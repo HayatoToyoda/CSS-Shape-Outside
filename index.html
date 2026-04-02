@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Daily Objects — Wire Collection</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DotGothic16&family=IBM+Plex+Mono:wght@400;600&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+  <style>
+    /* Nothing-adjacent: black field, silver type, red telemetry marks */
+    :root {
+      --void: #000000;
+      --ink: #ffffff;
+      --silver: #a0a0a0;
+      --accent: #ff0000;
+      --wire: rgba(255, 255, 255, 0.55);
+      --wire-dim: rgba(160, 160, 160, 0.35);
+      --cube-w: 112px;
+      --cube-h: 112px;
+    }
+
+    @media (min-width: 900px) {
+      :root {
+        --cube-w: 232px;
+        --cube-h: 232px;
+      }
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background-color: var(--void);
+      color: var(--silver);
+      font-family: "DotGothic16", "IBM Plex Mono", "Share Tech Mono", ui-monospace, monospace;
+      font-size: 0.9375rem;
+      line-height: 1.75;
+      letter-spacing: 0.02em;
+    }
+
+    /* Film grain — fixed overlay, non-interactive */
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 9999;
+      opacity: 0.22;
+      mix-blend-mode: overlay;
+      background-image:
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='256' height='256'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.55'/%3E%3C/svg%3E");
+      background-size: 180px 180px;
+      animation: grain-shift 0.8s steps(2) infinite;
+    }
+
+    @keyframes grain-shift {
+      0% { transform: translate(0, 0); }
+      50% { transform: translate(-3%, 2%); }
+      100% { transform: translate(0, 0); }
+    }
+
+    .page {
+      max-width: 52rem;
+      margin: 0 auto;
+      padding: 1.75rem 1.25rem 4rem;
+      position: relative;
+      z-index: 0;
+    }
+
+    .masthead {
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      padding-bottom: 1.25rem;
+      margin-bottom: 1.75rem;
+    }
+
+    .masthead__eyebrow {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.28em;
+      color: var(--silver);
+      margin-bottom: 0.65rem;
+    }
+
+    .masthead__eyebrow::before {
+      content: "";
+      width: 6px;
+      height: 6px;
+      background: var(--accent);
+      border-radius: 50%;
+      box-shadow: 0 0 0 1px rgba(255, 0, 0, 0.35);
+    }
+
+    h1 {
+      margin: 0;
+      font-family: "Share Tech Mono", "IBM Plex Mono", monospace;
+      font-weight: 400;
+      font-size: clamp(1.35rem, 4vw, 2rem);
+      color: var(--ink);
+      letter-spacing: 0.06em;
+      line-height: 1.25;
+    }
+
+    .masthead__rule {
+      margin-top: 1rem;
+      height: 1px;
+      background: linear-gradient(
+        90deg,
+        var(--accent) 0,
+        var(--accent) 48px,
+        rgba(255, 255, 255, 0.12) 48px,
+        rgba(255, 255, 255, 0.12) 100%
+      );
+    }
+
+    .meta-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem 2rem;
+      margin-top: 0.85rem;
+      font-size: 0.72rem;
+      color: var(--silver);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .meta-row span::before {
+      content: "";
+      display: inline-block;
+      width: 4px;
+      height: 4px;
+      margin-right: 0.45rem;
+      vertical-align: middle;
+      background: var(--accent);
+      border-radius: 1px;
+    }
+
+    /* Floating wire cube: shape-outside + clip-path share animated polygon */
+    .wire-cube {
+      float: right;
+      width: var(--cube-w);
+      height: var(--cube-h);
+      margin: 0 0 1rem 1.25rem;
+      shape-margin: 0.65rem;
+      /* Isometric-style hex + inner edges (SVG), clipped to same hex as layout shape */
+      background-color: rgba(255, 255, 255, 0.04);
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cg fill='none' stroke='%23ffffff' stroke-opacity='0.5' stroke-width='0.85' vector-effect='non-scaling-stroke'%3E%3Cpath d='M50 4 L91 28 L91 72 L50 96 L9 72 L9 28 Z'/%3E%3Cpath d='M50 4 L50 50 L9 28' stroke-opacity='0.35'/%3E%3Cpath d='M50 4 L50 50 L91 28' stroke-opacity='0.35'/%3E%3Cpath d='M50 50 L9 72' stroke-opacity='0.35'/%3E%3Cpath d='M50 50 L91 72' stroke-opacity='0.35'/%3E%3Cpath d='M50 50 L50 96' stroke-opacity='0.28'/%3E%3C/g%3E%3Ccircle cx='50' cy='50' r='1.6' fill='%23ff0000' fill-opacity='0.9'/%3E%3C/svg%3E");
+      background-size: 100% 100%;
+      background-position: center;
+      background-repeat: no-repeat;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      animation: cube-orbit 10s linear infinite;
+    }
+
+    /*
+      Hexagon = oblique cube silhouette. Animate left/right shoulders so the
+      wrap boundary advances into the column (low x on left verts) vs recedes (high x).
+    */
+    @keyframes cube-orbit {
+      0%,
+      100% {
+        shape-outside: polygon(
+          50% 3%,
+          88% 27%,
+          88% 73%,
+          50% 97%,
+          22% 73%,
+          22% 27%
+        );
+        clip-path: polygon(
+          50% 3%,
+          88% 27%,
+          88% 73%,
+          50% 97%,
+          22% 73%,
+          22% 27%
+        );
+      }
+      8.333% {
+        shape-outside: polygon(
+          50% 3%,
+          90% 27%,
+          90% 73%,
+          50% 97%,
+          12% 73%,
+          12% 27%
+        );
+        clip-path: polygon(
+          50% 3%,
+          90% 27%,
+          90% 73%,
+          50% 97%,
+          12% 73%,
+          12% 27%
+        );
+      }
+      16.666% {
+        shape-outside: polygon(
+          50% 3%,
+          92% 27%,
+          92% 73%,
+          50% 97%,
+          6% 73%,
+          6% 27%
+        );
+        clip-path: polygon(
+          50% 3%,
+          92% 27%,
+          92% 73%,
+          50% 97%,
+          6% 73%,
+          6% 27%
+        );
+      }
+      25% {
+        shape-outside: polygon(
+          50% 3%,
+          93% 27%,
+          93% 73%,
+          50% 97%,
+          4% 73%,
+          4% 27%
+        );
+        clip-path: polygon(
+          50% 3%,
+          93% 27%,
+          93% 73%,
+          50% 97%,
+          4% 73%,
+          4% 27%
+        );
+      }
+      33.333% {
+        shape-outside: polygon(
+          50% 3%,
+          91% 27%,
+          91% 73%,
+          50% 97%,
+          10% 73%,
+          10% 27%
+        );
+        clip-path: polygon(
+          50% 3%,
+          91% 27%,
+          91% 73%,
+          50% 97%,
+          10% 73%,
+          10% 27%
+        );
+      }
+      41.666% {
+        shape-outside: polygon(
+          50% 3%,
+          87% 27%,
+          87% 73%,
+          50% 97%,
+          20% 73%,
+          20% 27%
+        );
+        clip-path: polygon(
+          50% 3%,
+          87% 27%,
+          87% 73%,
+          50% 97%,
+          20% 73%,
+          20% 27%
+        );
+      }
+      50% {
+        shape-outside: polygon(
+          50% 3%,
+          84% 27%,
+          84% 73%,
+          50% 97%,
+          28% 73%,
+          28% 27%
+        );
+        clip-path: polygon(
+          50% 3%,
+          84% 27%,
+          84% 73%,
+          50% 97%,
+          28% 73%,
+          28% 27%
+        );
+      }
+      58.333% {
+        shape-outside: polygon(
+          50% 3%,
+          81% 27%,
+          81% 73%,
+          50% 97%,
+          34% 73%,
+          34% 27%
+        );
+        clip-path: polygon(
+          50% 3%,
+          81% 27%,
+          81% 73%,
+          50% 97%,
+          34% 73%,
+          34% 27%
+        );
+      }
+      66.666% {
+        shape-outside: polygon(
+          50% 3%,
+          78% 27%,
+          78% 73%,
+          50% 97%,
+          38% 73%,
+          38% 27%
+        );
+        clip-path: polygon(
+          50% 3%,
+          78% 27%,
+          78% 73%,
+          50% 97%,
+          38% 73%,
+          38% 27%
+        );
+      }
+      75% {
+        shape-outside: polygon(
+          50% 3%,
+          76% 27%,
+          76% 73%,
+          50% 97%,
+          40% 73%,
+          40% 27%
+        );
+        clip-path: polygon(
+          50% 3%,
+          76% 27%,
+          76% 73%,
+          50% 97%,
+          40% 73%,
+          40% 27%
+        );
+      }
+      83.333% {
+        shape-outside: polygon(
+          50% 3%,
+          79% 27%,
+          79% 73%,
+          50% 97%,
+          35% 73%,
+          35% 27%
+        );
+        clip-path: polygon(
+          50% 3%,
+          79% 27%,
+          79% 73%,
+          50% 97%,
+          35% 73%,
+          35% 27%
+        );
+      }
+      91.666% {
+        shape-outside: polygon(
+          50% 3%,
+          84% 27%,
+          84% 73%,
+          50% 97%,
+          26% 73%,
+          26% 27%
+        );
+        clip-path: polygon(
+          50% 3%,
+          84% 27%,
+          84% 73%,
+          50% 97%,
+          26% 73%,
+          26% 27%
+        );
+      }
+    }
+
+    .prose {
+      margin: 0;
+    }
+
+    .prose p {
+      margin: 0 0 1.1em;
+      text-align: justify;
+      hyphens: auto;
+    }
+
+    .prose p strong {
+      color: var(--ink);
+      font-weight: 600;
+    }
+
+    .prose h2 {
+      clear: both;
+      margin: 2.25rem 0 0.85rem;
+      font-family: "Share Tech Mono", monospace;
+      font-size: 0.85rem;
+      font-weight: 400;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--ink);
+      border-left: 2px solid var(--accent);
+      padding-left: 0.75rem;
+    }
+
+    .footnote {
+      margin-top: 2.5rem;
+      padding-top: 1.25rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      font-size: 0.72rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--silver);
+    }
+
+    .footnote::before {
+      content: "";
+      display: block;
+      width: 32px;
+      height: 2px;
+      background: var(--accent);
+      margin-bottom: 0.75rem;
+    }
+
+    .clearfix::after {
+      content: "";
+      display: table;
+      clear: both;
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <header class="masthead">
+      <p class="masthead__eyebrow">Daily Wire / Object Index</p>
+      <h1>机上の立体を記録する、黒いログ。</h1>
+      <div class="masthead__rule" aria-hidden="true"></div>
+      <div class="meta-row">
+        <span>Channel 00</span>
+        <span>Glyph Mono</span>
+        <span>Wrap Test</span>
+      </div>
+    </header>
+
+    <article class="prose clearfix">
+      <!-- 右上相当: float:right により先に配置され、長文が左へ回り込む -->
+      <div class="wire-cube" role="img" aria-label="回転するワイヤーフレーム立方体のシルエット"></div>
+
+      <p>
+        このページは、<strong>日々の3Dオブジェクト</strong>をコレクションし、材質と寸法と置かれた文脈だけを淡々と残すためのダミー・ログである。
+        机の上の粘土、送られてきた試作の樹脂、落としたアイスクリームの木片、観光地の安物の多面体キーホルダー。
+        それらはすべて、最終的には同じ<strong>メッシュの亡霊</strong>としてディスクに眠る。ここではその手前の、まだ指で触れられる段階の話をする。
+      </p>
+      <p>
+        午前の光が斜めに差すとき、プラスチックの角は白く硬化し、金属はわずかに青く見える。
+        ぼくはその変化を信じないように、スマートフォンのメモに「<strong>2026-04-02 / キューブ / 辺 34mm / 指紋あり</strong>」と書く。
+        書いた瞬間に文字はデータになり、画面の黒に沈む。Nothing OS が好むのは、その沈黙のあとに残る、細いシルバーのタイポグラフィと、時折だけ点滅する赤い記号だ。
+      </p>
+      <p>
+        右肩上がりに浮かぶワイヤーフレームは、実体ではなく<strong>ラッピング境界の演算</strong>だ。
+        <code style="color: var(--ink); font-size: 0.88em;">shape-outside</code> が描く六角形は、斜め上から見た立方体の輪郭を借りている。
+        テキストはその左側を流れ、頂点が手前に出るフレームでは列が狭まり、面がフラットに見えるフレームでは列が戻る。
+        これは錯覚ではなく、ブラウザが毎フレーム再計算している<strong>排他的な幾何学</strong>である。
+      </p>
+      <p>
+        コレクションの倫理は単純で、所有ではなく<strong>観測の連続性</strong>を優先する。
+        同じ形状でも、削られた痕、塗装の剥がれ、温度で歪んだ底面は別エントリになる。
+        長いダミーテキストは、その粒度を模倣するためのフィラーだ。読者が途中で飽きても、レイアウトエンジンは飽きない。
+        行は折れ、単語は分割され、右端の幽霊立方体との距離だけが規則正しく脈打つ。それで十分だ。
+      </p>
+      <p>
+        夕方になると、部屋のノイズフロアが上がり、フィルムグレインのような粒子が視界の端で増殖したように感じる。
+        ぼくはそれを画面のノイズではなく、空気中の塵の統計として扱う。
+        立体は棚に戻され、ログは増え、赤いドットは未読の印として残る。明日もまた、別の角が光を盗むだろう。
+      </p>
+      <p>
+        もしこの文章が無限に続くなら、六角形の周期もまた無限に続く。
+        モバイルでは立方体は小さく、デスクトップでは大きく、しかし<strong>同じ線形時間</strong>で回る。
+        それは機械的な優しさで、情緒ではなく仕様として振る舞う。ぼくはその振る舞いを、デザインの一部として受け入れる。
+      </p>
+
+      <h2>Appendix</h2>
+      <p>
+        附則として、浮動小数の誤差やサブピクセル合成はここでは語らない。
+        語るべきは、黒背景に沈んだ文字が、銀色で読め、ときどき赤で刺さることだけだ。
+        立体は手元にはないが、境界はまだ、右肩の空間に存在している。
+      </p>
+    </article>
+
+    <p class="footnote">End of stream · shape-outside polygon sync</p>
+  </div>
+</body>
+</html>
