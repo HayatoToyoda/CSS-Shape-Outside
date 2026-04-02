@@ -1,0 +1,888 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>3D OBJECT ARCHIVE — NOTHING</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DotGothic16&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --nothing-red: #FF0000;
+      --silver: #A0A0A0;
+      --light-silver: #C8C8C8;
+      --dim-silver: rgba(160, 160, 160, 0.15);
+      --cube-mobile: 115px;
+      --cube-mobile-h: 132px;
+      --cube-desktop: 240px;
+      --cube-desktop-h: 276px;
+    }
+
+    html {
+      font-size: 14px;
+    }
+
+    body {
+      background: #050505;
+      color: #e0e0e0;
+      font-family: 'DotGothic16', 'Share Tech Mono', 'Courier New', monospace;
+      line-height: 1.85;
+      min-height: 100vh;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+      overflow-wrap: break-word;
+    }
+
+    /* ───────────── Film grain noise ───────────── */
+    .grain {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 10000;
+      opacity: 0.04;
+    }
+
+    /* ───────────── Header ───────────── */
+    header {
+      padding: 18px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--dim-silver);
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.7rem;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--silver);
+    }
+
+    .logo-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--nothing-red);
+      box-shadow: 0 0 8px rgba(255, 0, 0, 0.6);
+      animation: blink 3s ease-in-out infinite;
+    }
+
+    nav {
+      display: flex;
+      gap: 16px;
+    }
+
+    nav a {
+      color: var(--silver);
+      text-decoration: none;
+      font-size: 0.6rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      transition: color 0.3s;
+      position: relative;
+    }
+
+    nav a:hover {
+      color: #fff;
+    }
+
+    nav a::after {
+      content: '';
+      position: absolute;
+      bottom: -4px;
+      left: 0;
+      width: 0;
+      height: 1px;
+      background: var(--nothing-red);
+      transition: width 0.3s;
+    }
+
+    nav a:hover::after {
+      width: 100%;
+    }
+
+    /* ───────────── Hero ───────────── */
+    .hero {
+      padding: 40px 16px 30px;
+      border-bottom: 1px solid rgba(160, 160, 160, 0.06);
+    }
+
+    .hero h1 {
+      font-family: 'Share Tech Mono', 'Courier New', monospace;
+      font-size: 1.6rem;
+      font-weight: 400;
+      letter-spacing: 0.35em;
+      color: #fff;
+      margin-bottom: 6px;
+      line-height: 1.5;
+    }
+
+    .hero .subtitle {
+      font-size: 0.72rem;
+      color: var(--silver);
+      letter-spacing: 0.1em;
+    }
+
+    .red-line {
+      width: 30px;
+      height: 2px;
+      background: var(--nothing-red);
+      margin: 18px 0;
+      box-shadow: 0 0 6px rgba(255, 0, 0, 0.35);
+      animation: pulse-line 4s ease-in-out infinite;
+    }
+
+    /* ───────────── Main content + floating cube ───────────── */
+    .content {
+      padding: 30px 16px 40px;
+      max-width: 900px;
+      margin: 0 auto;
+      position: relative;
+    }
+
+    .content::after {
+      content: '';
+      display: block;
+      clear: both;
+    }
+
+    .content h2 {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.9rem;
+      color: #fff;
+      letter-spacing: 0.25em;
+      margin-bottom: 18px;
+      font-weight: 400;
+    }
+
+    .content p {
+      margin-bottom: 22px;
+      color: var(--silver);
+      font-size: 0.82rem;
+      line-height: 2;
+    }
+
+    .content .accent-text {
+      color: var(--light-silver);
+    }
+
+    /* ───────────────────────────────────────────────────────
+       THE CUBE — Wireframe hexagonal projection
+       float:right + shape-outside + clip-path animation
+       ─────────────────────────────────────────────────── */
+    .cube-wrap {
+      float: right;
+      width: var(--cube-mobile);
+      height: var(--cube-mobile-h);
+      margin: 0 0 16px 16px;
+      position: relative;
+
+      shape-outside: polygon(
+        50% 0%,
+        93% 23%, 93% 77%,
+        50% 100%,
+        7% 77%, 7% 23%
+      );
+      shape-margin: 10px;
+
+      clip-path: polygon(
+        50% 0%,
+        93% 23%, 93% 77%,
+        50% 100%,
+        7% 77%, 7% 23%
+      );
+
+      animation: cube-spin 12s linear infinite;
+      will-change: clip-path, shape-outside;
+    }
+
+    .cube-face {
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(
+          210deg,
+          rgba(255, 255, 255, 0.06) 0%,
+          rgba(160, 160, 160, 0.02) 50%,
+          rgba(255, 255, 255, 0.04) 100%
+        );
+    }
+
+    .cube-face::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(180deg,
+          transparent 0%, transparent 49.5%,
+          rgba(160, 160, 160, 0.18) 49.5%, rgba(160, 160, 160, 0.18) 50.5%,
+          transparent 50.5%, transparent 100%
+        ),
+        linear-gradient(60deg,
+          transparent 0%, transparent 49.5%,
+          rgba(160, 160, 160, 0.12) 49.5%, rgba(160, 160, 160, 0.12) 50.5%,
+          transparent 50.5%, transparent 100%
+        ),
+        linear-gradient(120deg,
+          transparent 0%, transparent 49.5%,
+          rgba(160, 160, 160, 0.12) 49.5%, rgba(160, 160, 160, 0.12) 50.5%,
+          transparent 50.5%, transparent 100%
+        );
+    }
+
+    .cube-face::after {
+      content: '';
+      position: absolute;
+      inset: 2px;
+      border: 1px solid rgba(160, 160, 160, 0.12);
+      clip-path: inherit;
+    }
+
+    .cube-glow {
+      position: absolute;
+      inset: 0;
+      filter: drop-shadow(0 0 2px rgba(160, 160, 160, 0.25))
+              drop-shadow(0 0 8px rgba(160, 160, 160, 0.05));
+      pointer-events: none;
+    }
+
+    .cube-glow::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border: 1px solid rgba(200, 200, 200, 0.2);
+      clip-path: polygon(
+        50% 0%,
+        93% 23%, 93% 77%,
+        50% 100%,
+        7% 77%, 7% 23%
+      );
+      animation: glow-spin 12s linear infinite;
+    }
+
+    .cube-red-dot {
+      position: absolute;
+      top: 18%;
+      right: 32%;
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      background: var(--nothing-red);
+      box-shadow: 0 0 6px rgba(255, 0, 0, 0.5);
+      animation: blink 2.5s ease-in-out infinite;
+      z-index: 2;
+    }
+
+    /*
+     * Cube spin animation — hexagonal polygon morphing.
+     *
+     * Simulates a cube rotating around its vertical axis.
+     * Phase 0%:   front-face — balanced hexagon
+     * Phase 25%:  left face approaching — left vertices push outward, right narrows
+     * Phase 50%:  edge-on — shape narrows to a diamond, text relaxes maximally
+     * Phase 75%:  right face approaching — right vertices expand, left pulls in
+     * Phase 100%: back to front-face
+     *
+     * shape-outside and clip-path stay in perfect sync.
+     * Text reflow mirrors the polygon boundary in real-time.
+     */
+    @keyframes cube-spin {
+      0%, 100% {
+        clip-path: polygon(50% 0%, 93% 23%, 93% 77%, 50% 100%, 7% 77%, 7% 23%);
+        shape-outside: polygon(50% 0%, 93% 23%, 93% 77%, 50% 100%, 7% 77%, 7% 23%);
+      }
+      8.33% {
+        clip-path: polygon(50% 0%, 88% 25%, 88% 75%, 50% 100%, 2% 73%, 2% 27%);
+        shape-outside: polygon(50% 0%, 88% 25%, 88% 75%, 50% 100%, 2% 73%, 2% 27%);
+      }
+      16.67% {
+        clip-path: polygon(50% 0%, 80% 28%, 80% 72%, 50% 100%, 0% 70%, 0% 30%);
+        shape-outside: polygon(50% 0%, 80% 28%, 80% 72%, 50% 100%, 0% 70%, 0% 30%);
+      }
+      25% {
+        clip-path: polygon(50% 0%, 74% 31%, 74% 69%, 50% 100%, 0% 66%, 0% 34%);
+        shape-outside: polygon(50% 0%, 74% 31%, 74% 69%, 50% 100%, 0% 66%, 0% 34%);
+      }
+      33.33% {
+        clip-path: polygon(50% 0%, 68% 34%, 68% 66%, 50% 100%, 8% 66%, 8% 34%);
+        shape-outside: polygon(50% 0%, 68% 34%, 68% 66%, 50% 100%, 8% 66%, 8% 34%);
+      }
+      41.67% {
+        clip-path: polygon(50% 0%, 62% 37%, 62% 63%, 50% 100%, 20% 65%, 20% 35%);
+        shape-outside: polygon(50% 0%, 62% 37%, 62% 63%, 50% 100%, 20% 65%, 20% 35%);
+      }
+      50% {
+        clip-path: polygon(50% 0%, 60% 38%, 60% 62%, 50% 100%, 35% 62%, 35% 38%);
+        shape-outside: polygon(50% 0%, 60% 38%, 60% 62%, 50% 100%, 35% 62%, 35% 38%);
+      }
+      58.33% {
+        clip-path: polygon(50% 0%, 68% 34%, 68% 66%, 50% 100%, 42% 66%, 42% 34%);
+        shape-outside: polygon(50% 0%, 68% 34%, 68% 66%, 50% 100%, 42% 66%, 42% 34%);
+      }
+      66.67% {
+        clip-path: polygon(50% 0%, 80% 28%, 80% 72%, 50% 100%, 38% 72%, 38% 28%);
+        shape-outside: polygon(50% 0%, 80% 28%, 80% 72%, 50% 100%, 38% 72%, 38% 28%);
+      }
+      75% {
+        clip-path: polygon(50% 0%, 93% 23%, 93% 77%, 50% 100%, 28% 77%, 28% 23%);
+        shape-outside: polygon(50% 0%, 93% 23%, 93% 77%, 50% 100%, 28% 77%, 28% 23%);
+      }
+      83.33% {
+        clip-path: polygon(50% 0%, 100% 20%, 100% 80%, 50% 100%, 22% 80%, 22% 20%);
+        shape-outside: polygon(50% 0%, 100% 20%, 100% 80%, 50% 100%, 22% 80%, 22% 20%);
+      }
+      91.67% {
+        clip-path: polygon(50% 0%, 98% 21%, 98% 79%, 50% 100%, 12% 79%, 12% 21%);
+        shape-outside: polygon(50% 0%, 98% 21%, 98% 79%, 50% 100%, 12% 79%, 12% 21%);
+      }
+    }
+
+    @keyframes glow-spin {
+      0%, 100% {
+        clip-path: polygon(50% 0%, 93% 23%, 93% 77%, 50% 100%, 7% 77%, 7% 23%);
+      }
+      8.33% {
+        clip-path: polygon(50% 0%, 88% 25%, 88% 75%, 50% 100%, 2% 73%, 2% 27%);
+      }
+      16.67% {
+        clip-path: polygon(50% 0%, 80% 28%, 80% 72%, 50% 100%, 0% 70%, 0% 30%);
+      }
+      25% {
+        clip-path: polygon(50% 0%, 74% 31%, 74% 69%, 50% 100%, 0% 66%, 0% 34%);
+      }
+      33.33% {
+        clip-path: polygon(50% 0%, 68% 34%, 68% 66%, 50% 100%, 8% 66%, 8% 34%);
+      }
+      41.67% {
+        clip-path: polygon(50% 0%, 62% 37%, 62% 63%, 50% 100%, 20% 65%, 20% 35%);
+      }
+      50% {
+        clip-path: polygon(50% 0%, 60% 38%, 60% 62%, 50% 100%, 35% 62%, 35% 38%);
+      }
+      58.33% {
+        clip-path: polygon(50% 0%, 68% 34%, 68% 66%, 50% 100%, 42% 66%, 42% 34%);
+      }
+      66.67% {
+        clip-path: polygon(50% 0%, 80% 28%, 80% 72%, 50% 100%, 38% 72%, 38% 28%);
+      }
+      75% {
+        clip-path: polygon(50% 0%, 93% 23%, 93% 77%, 50% 100%, 28% 77%, 28% 23%);
+      }
+      83.33% {
+        clip-path: polygon(50% 0%, 100% 20%, 100% 80%, 50% 100%, 22% 80%, 22% 20%);
+      }
+      91.67% {
+        clip-path: polygon(50% 0%, 98% 21%, 98% 79%, 50% 100%, 12% 79%, 12% 21%);
+      }
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.15; }
+    }
+
+    @keyframes pulse-line {
+      0%, 100% { width: 30px; opacity: 1; }
+      50% { width: 55px; opacity: 0.7; }
+    }
+
+    /* ───────────── Section divider ───────────── */
+    .divider {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 16px;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    .divider::before,
+    .divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: rgba(160, 160, 160, 0.08);
+    }
+
+    .divider span {
+      font-size: 0.52rem;
+      color: rgba(160, 160, 160, 0.3);
+      letter-spacing: 0.35em;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    /* ───────────── Collection items ───────────── */
+    .items {
+      padding: 30px 16px;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    .items-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 22px;
+    }
+
+    .items-header .dot {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: var(--nothing-red);
+      box-shadow: 0 0 4px rgba(255, 0, 0, 0.4);
+    }
+
+    .items-header h2 {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.72rem;
+      color: var(--silver);
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      font-weight: 400;
+    }
+
+    .item-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 14px;
+    }
+
+    .item-card {
+      border: 1px solid rgba(160, 160, 160, 0.08);
+      padding: 20px;
+      position: relative;
+      transition: border-color 0.3s;
+      background: rgba(255, 255, 255, 0.008);
+    }
+
+    .item-card:hover {
+      border-color: rgba(160, 160, 160, 0.25);
+    }
+
+    .item-card::before {
+      content: '';
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      background: var(--nothing-red);
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    .item-card:hover::before {
+      opacity: 0.8;
+    }
+
+    .item-id {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.55rem;
+      color: rgba(160, 160, 160, 0.3);
+      letter-spacing: 0.2em;
+      margin-bottom: 8px;
+    }
+
+    .item-card h3 {
+      font-size: 0.85rem;
+      color: #fff;
+      font-weight: 400;
+      letter-spacing: 0.15em;
+      margin-bottom: 10px;
+    }
+
+    .item-card p {
+      font-size: 0.7rem;
+      color: var(--silver);
+      line-height: 1.85;
+    }
+
+    .item-meta {
+      margin-top: 14px;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.52rem;
+      color: rgba(160, 160, 160, 0.4);
+      letter-spacing: 0.1em;
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    /* ───────────── Spec block ───────────── */
+    .spec-block {
+      padding: 24px 16px;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    .spec-block h2 {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.72rem;
+      color: var(--silver);
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      font-weight: 400;
+      margin-bottom: 18px;
+    }
+
+    .spec-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 9px 0;
+      border-bottom: 1px solid rgba(160, 160, 160, 0.05);
+      font-size: 0.65rem;
+    }
+
+    .spec-row .spec-label {
+      font-family: 'Share Tech Mono', monospace;
+      color: rgba(160, 160, 160, 0.45);
+      letter-spacing: 0.12em;
+    }
+
+    .spec-row .spec-value {
+      font-family: 'Share Tech Mono', monospace;
+      color: #d8d8d8;
+      letter-spacing: 0.06em;
+    }
+
+    /* ───────────── Footer ───────────── */
+    footer {
+      padding: 45px 16px 30px;
+      border-top: 1px solid rgba(160, 160, 160, 0.06);
+      text-align: center;
+    }
+
+    footer .footer-dots {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    footer .footer-dots span {
+      width: 3px;
+      height: 3px;
+      border-radius: 50%;
+      background: rgba(160, 160, 160, 0.18);
+    }
+
+    footer .footer-dots span:nth-child(2) {
+      background: var(--nothing-red);
+      opacity: 0.45;
+    }
+
+    footer p {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.55rem;
+      color: rgba(160, 160, 160, 0.2);
+      letter-spacing: 0.25em;
+    }
+
+    /* ───────────── Responsive: Tablet (768px+) ───────────── */
+    @media (min-width: 768px) {
+      html { font-size: 15px; }
+
+      header { padding: 22px 36px; }
+      nav { gap: 22px; }
+
+      .hero { padding: 55px 36px 38px; }
+      .hero h1 { font-size: 2.1rem; }
+
+      .content { padding: 40px 36px 50px; }
+
+      .cube-wrap {
+        width: 180px;
+        height: 207px;
+        margin: 0 0 20px 26px;
+        shape-margin: 16px;
+      }
+
+      .divider { padding: 10px 36px; }
+      .items { padding: 36px; }
+      .item-grid { grid-template-columns: repeat(2, 1fr); }
+      .spec-block { padding: 24px 36px; }
+      footer { padding: 50px 36px 30px; }
+    }
+
+    /* ───────────── Responsive: Desktop (1200px+) ───────────── */
+    @media (min-width: 1200px) {
+      html { font-size: 16px; }
+
+      header { padding: 24px 56px; }
+      nav { gap: 28px; }
+
+      .hero { padding: 75px 56px 48px; }
+      .hero h1 { font-size: 2.8rem; }
+
+      .content {
+        padding: 50px 56px 60px;
+        max-width: 1100px;
+      }
+
+      .cube-wrap {
+        width: var(--cube-desktop);
+        height: var(--cube-desktop-h);
+        margin: 0 0 24px 36px;
+        shape-margin: 22px;
+      }
+
+      .divider { padding: 10px 56px; max-width: 1100px; }
+      .items { padding: 46px 56px; max-width: 1100px; }
+      .item-grid { grid-template-columns: repeat(3, 1fr); }
+      .spec-block { padding: 28px 56px; max-width: 1100px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Film grain noise -->
+  <svg class="grain" xmlns="http://www.w3.org/2000/svg">
+    <filter id="noiseFilter">
+      <feTurbulence type="fractalNoise" baseFrequency="0.7" numOctaves="3" stitchTiles="stitch"/>
+      <feColorMatrix type="saturate" values="0"/>
+    </filter>
+    <rect width="100%" height="100%" filter="url(#noiseFilter)" opacity="0.9"/>
+  </svg>
+
+  <!-- Header -->
+  <header>
+    <div class="logo">
+      <span class="logo-dot"></span>
+      <span>Object Archive</span>
+    </div>
+    <nav>
+      <a href="#">Index</a>
+      <a href="#">Catalog</a>
+      <a href="#">About</a>
+    </nav>
+  </header>
+
+  <!-- Hero -->
+  <section class="hero">
+    <h1>3D OBJECT<br>ARCHIVE</h1>
+    <div class="red-line"></div>
+    <p class="subtitle">日常に潜む立体形状の記録と解析</p>
+  </section>
+
+  <!-- Content with floating cube -->
+  <section class="content">
+
+    <!-- Floating wireframe cube -->
+    <div class="cube-wrap">
+      <div class="cube-face"></div>
+      <div class="cube-glow"></div>
+      <div class="cube-red-dot"></div>
+    </div>
+
+    <h2>GEOMETRIC FORMS</h2>
+
+    <p>
+      私たちの周囲には、無数の立体形状が存在している。テーブルの上に置かれたマグカップ、
+      本棚に並ぶ書籍の背表紙、窓から差し込む光が落とす影——そのすべてが三次元空間における
+      幾何学的オブジェクトとして解釈可能である。本アーカイブは、そうした日常の中に潜む
+      立体形状を系統的に収集・分類・記録するプロジェクトとして発足した。
+      物体の形を観察し、その構造を解き明かすことは、人類が古くから続けてきた知的営為の
+      ひとつである。古代ギリシャのプラトンは、宇宙を構成する元素と正多面体を対応づけ、
+      形状に神秘的な意味を見出した。
+    </p>
+
+    <p class="accent-text">
+      立方体（キューブ）は最も基本的な多面体のひとつであり、6つの正方形面、
+      12の稜線、8つの頂点から構成される。その対称性と規則性は、建築・デザイン・
+      工学の分野において基準座標系として広く採用されている。アイソメトリック
+      投影法により二次元平面に射影すると、正六角形のシルエットが現れ、
+      3つの菱形面が均等に配置された特徴的なパターンを形成する。この六角形の
+      輪郭は、ワイヤーフレーム表現における最も象徴的なビジュアルのひとつであり、
+      デジタルデザインの文脈において頻繁に参照される。
+    </p>
+
+    <p>
+      各オブジェクトはワイヤーフレーム表現により抽象化され、その構造的本質のみが
+      抽出される。表面のテクスチャや色彩を排除し、純粋な形状情報——頂点座標、
+      稜線の接続関係、面の構成——のみをデータとして保持する。この還元主義的
+      アプローチにより、異なるオブジェクト間の構造的類似性や、隠れた幾何学的
+      パターンを発見することが可能となる。マテリアルの物性を無視し、
+      トポロジーのみに着目することで、一見まったく異なる形状が同一の
+      位相構造を共有していることが明らかになる場合がある。
+    </p>
+
+    <p>
+      デジタルアーカイブにおいて、各オブジェクトのメタデータは厳密に管理される。
+      取得日時、座標系、測定精度、スキャン方法——すべての情報がタグ付けされ、
+      検索可能なデータベースに格納される。頂点データは倍精度浮動小数点数で
+      記録され、0.001mm未満の精度が保証される。このレベルの精密さは、
+      マイクロスケールの形状解析やシミュレーションにおいて不可欠である。
+      データの整合性はハッシュ値により検証され、改ざんや劣化のない状態での
+      長期保存が実現されている。
+    </p>
+
+    <p>
+      収集対象は人工物に限定されない。自然界に存在する結晶構造、貝殻の
+      螺旋形状、植物の葉脈パターンなど、有機的な形状も重要なアーカイブ対象
+      である。これらの自然形状は、多くの場合、フラクタル的な自己相似性や
+      フィボナッチ数列に基づく黄金比を内包しており、純粋な幾何学では
+      記述しきれない複雑性を持つ。しかし、ワイヤーフレーム表現による
+      簡略化によって、その根底にある数学的構造を可視化することが可能となる。
+    </p>
+
+    <p>
+      本プロジェクトは、物理的な形状を純粋なデータへと昇華させる試みである。
+      固体としての存在から解放された幾何学的情報は、永続的なデジタル
+      アーティファクトとして保存され、未来の研究者やデザイナーにとっての
+      参照資料となるだろう。形状の本質は、物質ではなく、構造にある——
+      この哲学が、3D Object Archive の根幹を成している。すべての形は
+      数値に還元され、すべての構造は座標の集合として永遠に記録される。
+    </p>
+
+    <p>
+      座標空間における頂点の集合は、そのまま位相幾何学的な情報を内包する。
+      すなわち、ある頂点と別の頂点が稜線で結ばれているか否か、どの稜線が
+      どの面を構成するか、そしてそれらの面がどのように隣接しているか——
+      こうした接続情報こそが、三次元オブジェクトの「構造」そのものを定義する。
+      表面上は異なる形状であっても、同一のグラフ構造を持つオブジェクト群は
+      位相同値として分類される。こうした分類体系は、膨大なアーカイブの中から
+      構造的に類似したオブジェクトを効率的に検索するための基盤となる。
+    </p>
+  </section>
+
+  <!-- Divider -->
+  <div class="divider">
+    <span>Recent Entries</span>
+  </div>
+
+  <!-- Collection items -->
+  <section class="items">
+    <div class="items-header">
+      <span class="dot"></span>
+      <h2>Archive Collection</h2>
+    </div>
+
+    <div class="item-grid">
+      <div class="item-card">
+        <div class="item-id">OBJ-2024-0847</div>
+        <h3>正二十面体</h3>
+        <p>20の正三角形面、30の稜線、12の頂点から構成されるプラトン立体。対称群は回転群 I（位数60）に属し、すべての正多面体の中で最も球体に近い形状を持つ。</p>
+        <div class="item-meta">
+          <span>VERTICES: 12</span>
+          <span>EDGES: 30</span>
+          <span>FACES: 20</span>
+        </div>
+      </div>
+
+      <div class="item-card">
+        <div class="item-id">OBJ-2024-0923</div>
+        <h3>トーラス構造体</h3>
+        <p>ドーナツ形状の位相幾何学的曲面。オイラー標数は0。パラメトリック表現により32×32の制御点メッシュで近似される非自明な曲面構造。</p>
+        <div class="item-meta">
+          <span>GENUS: 1</span>
+          <span>SEGMENTS: 1024</span>
+          <span>TYPE: SURFACE</span>
+        </div>
+      </div>
+
+      <div class="item-card">
+        <div class="item-id">OBJ-2024-1105</div>
+        <h3>メビウスの帯</h3>
+        <p>非可向面の代表的な例。一枚の帯を半回転させて端を接合した構造体。表裏の区別が存在しない特異な位相的性質を持ち、境界は単一閉曲線となる。</p>
+        <div class="item-meta">
+          <span>ORIENTABLE: NO</span>
+          <span>EULER: 0</span>
+          <span>BOUNDARY: 1</span>
+        </div>
+      </div>
+
+      <div class="item-card">
+        <div class="item-id">OBJ-2025-0112</div>
+        <h3>クラインの壺</h3>
+        <p>三次元空間には埋め込み不可能な閉曲面。メビウスの帯を拡張した非可向閉曲面であり、内側と外側の区別が存在しない四次元的構造。</p>
+        <div class="item-meta">
+          <span>ORIENTABLE: NO</span>
+          <span>EULER: 0</span>
+          <span>DIM: 4</span>
+        </div>
+      </div>
+
+      <div class="item-card">
+        <div class="item-id">OBJ-2025-0308</div>
+        <h3>正十二面体</h3>
+        <p>12の正五角形面から構成されるプラトン立体。黄金比と深い関連を持ち、各頂点において3つの正五角形が会合する。宇宙の形状仮説でも議論される。</p>
+        <div class="item-meta">
+          <span>VERTICES: 20</span>
+          <span>EDGES: 30</span>
+          <span>FACES: 12</span>
+        </div>
+      </div>
+
+      <div class="item-card">
+        <div class="item-id">OBJ-2025-0401</div>
+        <h3>四次元超立方体</h3>
+        <p>テッセラクトとも呼ばれる四次元正多胞体。8つの立方体セル、24の正方形面、32の稜線、16の頂点を持つ。三次元への射影で複雑な入れ子構造が現れる。</p>
+        <div class="item-meta">
+          <span>CELLS: 8</span>
+          <span>FACES: 24</span>
+          <span>VERTICES: 16</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Spec block -->
+  <div class="divider">
+    <span>System Parameters</span>
+  </div>
+
+  <section class="spec-block">
+    <h2>Archive Specifications</h2>
+    <div class="spec-row">
+      <span class="spec-label">COORDINATE SYSTEM</span>
+      <span class="spec-value">RIGHT-HANDED CARTESIAN</span>
+    </div>
+    <div class="spec-row">
+      <span class="spec-label">PRECISION</span>
+      <span class="spec-value">FLOAT64 (IEEE 754)</span>
+    </div>
+    <div class="spec-row">
+      <span class="spec-label">MESH FORMAT</span>
+      <span class="spec-value">HALF-EDGE STRUCTURE</span>
+    </div>
+    <div class="spec-row">
+      <span class="spec-label">TOTAL OBJECTS</span>
+      <span class="spec-value">2,847</span>
+    </div>
+    <div class="spec-row">
+      <span class="spec-label">STORAGE</span>
+      <span class="spec-value">14.2 TB COMPRESSED</span>
+    </div>
+    <div class="spec-row">
+      <span class="spec-label">LAST SYNC</span>
+      <span class="spec-value">2025.04.02 — 00:00:00 UTC</span>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <div class="footer-dots">
+      <span></span>
+      <span></span>
+      <span></span>
+    </div>
+    <p>3D OBJECT ARCHIVE — NOTHING DESIGN SYSTEM — 2025</p>
+  </footer>
+
+</body>
+</html>
