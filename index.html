@@ -10,7 +10,321 @@
       href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;700&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="styles.css" />
+    <style>
+      :root {
+        --bg: #000000;
+        --bg-soft: #090909;
+        --text: #f5f5f5;
+        --muted: #a0a0a0;
+        --line: rgba(255, 255, 255, 0.3);
+        --line-strong: rgba(255, 255, 255, 0.68);
+        --panel: rgba(255, 255, 255, 0.06);
+        --accent: #ff0000;
+        --shape-0: polygon(34% 8%, 84% 22%, 84% 66%, 44% 92%, 8% 72%, 8% 28%);
+        --shape-25: polygon(42% 10%, 76% 20%, 78% 66%, 42% 90%, 16% 74%, 14% 30%);
+        --shape-50: polygon(50% 12%, 66% 18%, 68% 66%, 50% 88%, 28% 76%, 28% 30%);
+        --shape-75: polygon(40% 10%, 84% 22%, 82% 70%, 48% 92%, 14% 76%, 10% 30%);
+      }
+
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+      }
+
+      html {
+        color-scheme: dark;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        background:
+          radial-gradient(circle at top right, rgba(255, 255, 255, 0.08), transparent 24%),
+          linear-gradient(180deg, #070707 0%, #000000 36%, #030303 100%);
+        color: var(--text);
+        font-family: "IBM Plex Mono", "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+        line-height: 1.8;
+        letter-spacing: 0.02em;
+        position: relative;
+        overflow-x: hidden;
+      }
+
+      body::before,
+      body::after {
+        content: "";
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+      }
+
+      body::before {
+        background:
+          radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.05) 0 0.08rem, transparent 0.09rem),
+          radial-gradient(circle at 75% 35%, rgba(255, 255, 255, 0.035) 0 0.05rem, transparent 0.06rem),
+          radial-gradient(circle at 65% 80%, rgba(255, 255, 255, 0.03) 0 0.07rem, transparent 0.08rem);
+        background-size: 10rem 10rem, 12rem 12rem, 14rem 14rem;
+        opacity: 0.22;
+        mix-blend-mode: screen;
+      }
+
+      body::after {
+        background:
+          repeating-linear-gradient(
+            180deg,
+            rgba(255, 255, 255, 0.02) 0,
+            rgba(255, 255, 255, 0.02) 1px,
+            transparent 1px,
+            transparent 3px
+          );
+        opacity: 0.08;
+      }
+
+      .page-shell {
+        width: min(100%, 78rem);
+        margin: 0 auto;
+        padding: 1.25rem 1rem 3rem;
+      }
+
+      .hero {
+        position: relative;
+        padding: 1rem 0 1.75rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+      }
+
+      .hero::after {
+        content: "";
+        position: absolute;
+        left: 0;
+        bottom: -1px;
+        width: min(8rem, 24vw);
+        height: 1px;
+        background: linear-gradient(90deg, var(--accent), transparent);
+      }
+
+      .eyebrow,
+      .meta {
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        color: var(--muted);
+        text-transform: uppercase;
+        font-size: 0.74rem;
+        letter-spacing: 0.22em;
+      }
+
+      .eyebrow {
+        margin: 0 0 1rem;
+      }
+
+      .eyebrow-dot {
+        width: 0.5rem;
+        height: 0.5rem;
+        border-radius: 50%;
+        background: var(--accent);
+        box-shadow: 0 0 0.75rem rgba(255, 0, 0, 0.6);
+      }
+
+      h1 {
+        margin: 0;
+        max-width: 12ch;
+        font-size: clamp(2rem, 9vw, 4.4rem);
+        line-height: 0.95;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+
+      .hero-copy {
+        max-width: 46rem;
+        margin: 1rem 0 0;
+        color: #c9c9c9;
+        font-size: 0.98rem;
+      }
+
+      .content {
+        padding-top: 1.5rem;
+      }
+
+      .entry {
+        position: relative;
+      }
+
+      .copy-block {
+        color: #e7e7e7;
+      }
+
+      .copy-block p {
+        margin: 0 0 1.15rem;
+        text-wrap: pretty;
+      }
+
+      .meta {
+        margin: 0 0 1rem;
+        color: #c0c0c0;
+      }
+
+      .object-float {
+        float: right;
+        position: relative;
+        width: 7rem;
+        height: 7rem;
+        margin: 0.25rem 0 1rem 1.15rem;
+        shape-outside: var(--shape-0);
+        clip-path: var(--shape-0);
+        background:
+          linear-gradient(145deg, rgba(255, 255, 255, 0.16), rgba(255, 255, 255, 0.02)),
+          rgba(255, 255, 255, 0.04);
+        border: 1px solid var(--line);
+        box-shadow:
+          inset 0 0 0 1px rgba(255, 255, 255, 0.08),
+          0 0 0.9rem rgba(255, 255, 255, 0.08);
+        animation: objectSpin 12s linear infinite;
+      }
+
+      .object-float::before,
+      .object-float::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        clip-path: inherit;
+      }
+
+      .object-float::before {
+        border: 1px solid rgba(255, 255, 255, 0.54);
+        opacity: 0.95;
+      }
+
+      .object-float::after {
+        inset: 12%;
+        border: 1px solid rgba(255, 255, 255, 0.28);
+        mix-blend-mode: screen;
+      }
+
+      .object-core {
+        position: absolute;
+        inset: 0;
+      }
+
+      .plane {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        display: block;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.58), transparent);
+        transform-origin: center;
+      }
+
+      .plane-a {
+        width: 66%;
+        height: 1px;
+        transform: translate(-50%, -50%) rotate(0deg);
+      }
+
+      .plane-b {
+        width: 68%;
+        height: 1px;
+        transform: translate(-50%, -50%) rotate(58deg);
+      }
+
+      .plane-c {
+        width: 68%;
+        height: 1px;
+        transform: translate(-50%, -50%) rotate(-58deg);
+      }
+
+      .plane-d {
+        width: 1px;
+        height: 64%;
+        background: linear-gradient(180deg, transparent, rgba(255, 255, 255, 0.55), transparent);
+        transform: translate(-50%, -50%);
+      }
+
+      .spark {
+        position: absolute;
+        display: block;
+        border-radius: 50%;
+        background: var(--accent);
+        box-shadow: 0 0 0.8rem rgba(255, 0, 0, 0.5);
+      }
+
+      .spark-a {
+        width: 0.42rem;
+        height: 0.42rem;
+        top: 22%;
+        right: 16%;
+      }
+
+      .spark-b {
+        width: 0.2rem;
+        height: 0.2rem;
+        left: 20%;
+        bottom: 22%;
+      }
+
+      @keyframes objectSpin {
+        0% {
+          shape-outside: var(--shape-0);
+          clip-path: var(--shape-0);
+          transform: translateY(0) rotate(0.001deg);
+          border-color: rgba(255, 255, 255, 0.34);
+        }
+        25% {
+          shape-outside: var(--shape-25);
+          clip-path: var(--shape-25);
+          transform: translateY(0.08rem) rotate(0.001deg);
+          border-color: rgba(255, 255, 255, 0.46);
+        }
+        50% {
+          shape-outside: var(--shape-50);
+          clip-path: var(--shape-50);
+          transform: translateY(0) rotate(0.001deg);
+          border-color: rgba(255, 255, 255, 0.26);
+        }
+        75% {
+          shape-outside: var(--shape-75);
+          clip-path: var(--shape-75);
+          transform: translateY(-0.08rem) rotate(0.001deg);
+          border-color: rgba(255, 255, 255, 0.48);
+        }
+        100% {
+          shape-outside: var(--shape-0);
+          clip-path: var(--shape-0);
+          transform: translateY(0) rotate(0.001deg);
+          border-color: rgba(255, 255, 255, 0.34);
+        }
+      }
+
+      @media (min-width: 48rem) {
+        .page-shell {
+          padding: 2rem 1.8rem 4rem;
+        }
+
+        .hero {
+          padding-bottom: 2.4rem;
+        }
+
+        .hero-copy {
+          font-size: 1.02rem;
+        }
+
+        .content {
+          padding-top: 2rem;
+        }
+
+        .object-float {
+          width: 14rem;
+          height: 14rem;
+          margin: 0.4rem 0 1.2rem 2rem;
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .object-float {
+          animation-duration: 0.001ms;
+          animation-iteration-count: 1;
+        }
+      }
+    </style>
   </head>
   <body>
     <div class="page-shell">
