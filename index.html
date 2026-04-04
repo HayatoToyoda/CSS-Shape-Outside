@@ -47,11 +47,12 @@
       --caption:    12px;
       --label:      11px;
 
-      /* Layout — stronger rotating hex that pushes text from the right edge */
-      --cube-mobile:   min(42vw, 180px);
-      --cube-mobile-h: calc(var(--cube-mobile) * 132 / 115);
-      --cube-desktop:  min(40vw, 680px);
-      --cube-desktop-h: calc(var(--cube-desktop) * 276 / 240);
+      /* Layout — hex long diagonal (vertex↔vertex in SVG) = viewport height.
+         viewBox y: 3→97 → span 94/100 of box height → diagonal_px = height × 0.94 */
+      --cube-mobile-h: calc(100svh * 100 / 94);
+      --cube-mobile:   calc(var(--cube-mobile-h) * 115 / 132);
+      --cube-desktop:   var(--cube-mobile);
+      --cube-desktop-h: var(--cube-mobile-h);
       /* Horizontal padding of .content — float bleeds by this amount to the viewport edge */
       --content-pad-x: 16px;
       /* Half width — margin pulls float so hex center sits on viewport right */
@@ -274,7 +275,7 @@
 
     .cube-wire {
       position: fixed;
-      top: var(--cube-top);
+      top: calc(50vh - var(--cube-mobile-h) / 2);
       right: calc(-1 * var(--cube-half));
       width: var(--cube-mobile);
       height: var(--cube-mobile-h);
@@ -547,10 +548,7 @@
     /* ─────────────── Responsive: Tablet (768px+) ─────────────── */
     @media (min-width: 768px) {
       :root {
-        --cube-mobile: min(36vw, 320px);
-        --cube-mobile-h: calc(var(--cube-mobile) * 132 / 115);
         --content-pad-x: 36px;
-        --cube-half: calc(var(--cube-mobile) / 2);
         --cube-top: clamp(88px, 14svh, 144px);
       }
 
@@ -568,7 +566,7 @@
         margin: 0;
       }
       .cube-wire {
-        top: var(--cube-top);
+        top: calc(50vh - var(--cube-mobile-h) / 2);
         right: calc(-1 * var(--cube-half));
         width: var(--cube-mobile);
         height: var(--cube-mobile-h);
@@ -585,7 +583,6 @@
     @media (min-width: 1200px) {
       :root {
         --content-pad-x: 56px;
-        --cube-half: calc(var(--cube-desktop) / 2);
         --cube-top: clamp(112px, 16svh, 180px);
       }
 
@@ -615,7 +612,7 @@
         margin: 0;
       }
       .cube-wire {
-        top: var(--cube-top);
+        top: calc(50vh - var(--cube-desktop-h) / 2);
         right: calc(-1 * var(--cube-half));
         width: var(--cube-desktop);
         height: var(--cube-desktop-h);
@@ -933,41 +930,42 @@
         });
       }
 
-      /* For a y band [yMin, yMax] in SVG coords, find the leftmost x on the
-         hex outline that a text line at that band would need to avoid.
-         For a convex polygon, each horizontal band intersects exactly 0 or 2
-         edges. We want the LEFT-side intersection x (the smaller one).
-         Returns Infinity when the hex doesn't reach that band. */
+      /* For a y band [yMin, yMax] in SVG coords, find the leftmost x of the
+         hex OUTLINE that a text line needs to avoid.
+         A convex polygon intersected by a horizontal line yields exactly
+         two edge crossings: a left-side x and a right-side x. We want only
+         the smaller (left-side) x.
+         For near-horizontal edges, we determine left vs right by comparing
+         the edge's midpoint x to the polygon centroid (CX=50). */
       function leftEdgeForY(verts, yMin, yMax) {
-        var n = verts.length;
-        var xs = []; /* collect all intersection x values in this band */
-        var yMid = (yMin + yMax) / 2;
+        var n    = verts.length;
+        var yMid = (yMin + yMax) * 0.5;
+        var leftX = Infinity;
 
         for (var i = 0; i < n; i++) {
           var a = verts[i], b = verts[(i + 1) % n];
-          var sYMin = Math.min(a[1], b[1]), sYMax = Math.max(a[1], b[1]);
-          /* skip edges that don't cross the band mid-line */
-          if (sYMax <= yMid || sYMin > yMid) continue;
-          var dy = b[1] - a[1];
+          var aY = a[1], bY = b[1];
+          /* edge must straddle yMid */
+          if (!((aY <= yMid && bY >= yMid) || (bY <= yMid && aY >= yMid))) continue;
+
+          var dy = bY - aY;
           var x;
           if (Math.abs(dy) < 0.001) {
+            /* near-horizontal edge: use midpoint to decide left vs right */
+            var edgeMidX = (a[0] + b[0]) * 0.5;
+            if (edgeMidX >= CX) continue; /* right-side horizontal edge — skip */
             x = Math.min(a[0], b[0]);
           } else {
-            x = a[0] + (yMid - a[1]) * (b[0] - a[0]) / dy;
+            x = a[0] + (yMid - aY) * (b[0] - a[0]) / dy;
           }
-          xs.push(x);
+
+          if (x < leftX) leftX = x;
         }
 
-        if (xs.length === 0) return Infinity;
-        /* left edge = minimum x among intersections */
-        var minX = xs[0];
-        for (var j = 1; j < xs.length; j++) {
-          if (xs[j] < minX) minX = xs[j];
-        }
-        return minX;
+        return leftX; /* Infinity = hex doesn't reach this band */
       }
 
-      var LINE_H = 20; /* px: slice height — smaller = more precise, more iterations */
+      var LINE_H = 6; /* px: fine slicing for accurate per-line tracking */
 
       function tick(now) {
         var angle = -((now - startTime) % PERIOD_MS) / PERIOD_MS * Math.PI * 2;
