@@ -32,3 +32,17 @@ npx --yes serve .
 ## ブラウザ
 
 モダンな **Chrome / Edge / Safari** を想定しています。`100svh` や `prefers-reduced-motion` を利用しています。
+
+## GitHub Pages で公開する
+
+このリポジトリには [`.github/workflows/pages.yml`](.github/workflows/pages.yml) があり、`main` へのプッシュで静的サイトを GitHub Pages にデプロイします。
+
+1. GitHub でリポジトリを開く → **Settings** → **Pages**
+2. **Build and deployment** の **Source** を **GitHub Actions** にする（初回のみ）
+3. `main` にマージまたはプッシュするとワークフローが走り、完了後に URL が表示される
+
+公開 URL の例（ユーザー名・リポジトリ名は置き換え）:
+
+`https://<ユーザー名>.github.io/CSS-Shape-Outside/`
+
+ルートの `.nojekyll` は Jekyll を無効にし、`index.html` をそのまま配信するためのものです。
