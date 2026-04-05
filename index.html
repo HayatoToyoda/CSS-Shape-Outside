@@ -1084,7 +1084,6 @@
         var wW = wRect.width, wH = wRect.height;
         var hexTop    = wRect.top + hexSvgYMin / 100 * wH;
         var hexBottom = wRect.top + hexSvgYMax / 100 * wH;
-        var viewW     = document.documentElement.clientWidth;
 
         for (var i = 0; i < paras.length; i++) {
           var p = paras[i];
@@ -1107,7 +1106,8 @@
             var svgY1 = (sliceBot - wRect.top) / wH * 100;
             var lx = leftEdgeForY(verts, svgY0, svgY1);
             if (lx < Infinity) {
-              var bleed = viewW - (wRect.left + lx / 100 * wW);
+              /* Paragraph box is max-width centered; use its right edge, not viewport */
+              var bleed = pRect.right - (wRect.left + lx / 100 * wW);
               if (bleed > maxBleed) maxBleed = bleed;
             }
             y = sliceBot;
