@@ -154,6 +154,8 @@
 
     nav a.active {
       color: var(--text-display);
+      border-bottom: 1px solid var(--text-display);
+      padding-bottom: 2px;
     }
 
     /* Theme toggle button */
@@ -179,7 +181,7 @@
 
     /* ─────────────── Hero ─────────────── */
     .hero {
-      padding: 48px 16px 36px;
+      padding: 64px 16px 48px;
       border-bottom: 1px solid var(--border);
       position: relative;
       z-index: 1;
@@ -193,22 +195,22 @@
       letter-spacing: -0.03em;
       color: var(--text-display);
       line-height: 1.0;
-      margin-bottom: 16px;
+      margin-bottom: 32px;
       transition: color 200ms;
     }
 
     .red-line {
-      width: 30px;
+      width: 24px;
       height: 2px;
       background: var(--accent);
-      margin: 20px 0;
+      margin-bottom: 16px;
     }
 
     .hero .subtitle {
       font-family: 'Space Mono', monospace;
       font-size: var(--caption);
-      color: var(--text-secondary);
-      letter-spacing: 0.04em;
+      color: var(--text-disabled);
+      letter-spacing: 0.06em;
       text-transform: uppercase;
       transition: color 200ms;
     }
@@ -333,7 +335,7 @@
       letter-spacing: 0.08em;
       text-transform: uppercase;
       color: var(--text-disabled);
-      padding: 8px 16px;
+      padding: 12px 16px;
       max-width: 900px;
       margin: 0 auto;
       border-bottom: 1px solid var(--border);
@@ -344,7 +346,7 @@
 
     /* ─────────────── Collection items ─────────────── */
     .items {
-      padding: 32px 16px;
+      padding: 48px 16px;
       max-width: 900px;
       margin: 0 auto;
       position: relative;
@@ -355,15 +357,11 @@
       display: flex;
       align-items: center;
       gap: 8px;
-      margin-bottom: 24px;
+      margin-bottom: 32px;
     }
 
     .items-header .dot {
-      width: 5px;
-      height: 5px;
-      border-radius: 50%;
-      background: var(--accent);
-      flex-shrink: 0;
+      display: none;
     }
 
     .items-header h2 {
@@ -444,20 +442,30 @@
       display: flex;
       gap: 16px;
       flex-wrap: wrap;
+      border-top: 1px solid var(--border);
+      padding-top: 12px;
+      transition: border-color 200ms;
     }
 
     .item-meta span {
       font-family: 'Space Mono', monospace;
       font-size: var(--label);
-      color: var(--text-disabled);
       letter-spacing: 0.06em;
       text-transform: uppercase;
       transition: color 200ms;
     }
 
+    .item-meta .meta-label {
+      color: var(--text-disabled);
+    }
+
+    .item-meta .meta-value {
+      color: var(--text-primary);
+    }
+
     /* ─────────────── Spec block ─────────────── */
     .spec-block {
-      padding: 32px 16px;
+      padding: 48px 16px 32px;
       max-width: 900px;
       margin: 0 auto;
       position: relative;
@@ -471,7 +479,42 @@
       letter-spacing: 0.08em;
       text-transform: uppercase;
       font-weight: 400;
-      margin-bottom: 20px;
+      margin-bottom: 32px;
+      transition: color 200ms;
+    }
+
+    .spec-hero {
+      margin-bottom: 48px;
+    }
+
+    .spec-hero-label {
+      font-family: 'Space Mono', monospace;
+      font-size: var(--label);
+      color: var(--text-secondary);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+      transition: color 200ms;
+    }
+
+    .spec-hero-number {
+      font-family: 'Doto', 'Space Mono', monospace;
+      font-size: var(--display-lg);
+      font-weight: 700;
+      color: var(--text-display);
+      letter-spacing: -0.02em;
+      line-height: 1.05;
+      transition: color 200ms;
+    }
+
+    .spec-hero-unit {
+      font-family: 'Space Mono', monospace;
+      font-size: var(--label);
+      color: var(--text-disabled);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      margin-left: 8px;
+      vertical-align: baseline;
       transition: color 200ms;
     }
 
@@ -507,6 +550,36 @@
       transition: color 200ms;
     }
 
+    /* Segmented progress bar */
+    .spec-bar-row {
+      padding: 16px 0;
+      border-bottom: 1px solid var(--border);
+      transition: border-color 200ms;
+    }
+
+    .spec-bar-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 8px;
+    }
+
+    .seg-bar {
+      display: flex;
+      gap: 2px;
+      height: 8px;
+    }
+
+    .seg-bar span {
+      flex: 1;
+      background: var(--border);
+      transition: background-color 200ms;
+    }
+
+    .seg-bar span.filled {
+      background: var(--text-display);
+    }
+
     /* ─────────────── Footer ─────────────── */
     footer {
       padding: 48px 16px 32px;
@@ -517,11 +590,28 @@
       transition: border-color 200ms;
     }
 
+    .footer-status {
+      font-family: 'Space Mono', monospace;
+      font-size: var(--label);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-disabled);
+      margin-bottom: 12px;
+      transition: color 200ms;
+    }
+
+    .footer-status .status-dot {
+      display: inline-block;
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: var(--success, #4A9E5C);
+      margin-right: 6px;
+      vertical-align: middle;
+    }
+
     .footer-dots {
-      display: flex;
-      justify-content: center;
-      gap: 8px;
-      margin-bottom: 16px;
+      display: none;
     }
 
     .footer-dots span {
@@ -572,10 +662,10 @@
         height: var(--cube-mobile-h);
       }
 
-      .section-label { padding: 8px 36px; }
-      .items { padding: 40px 36px; }
-      .item-grid { grid-template-columns: repeat(2, 1fr); }
-      .spec-block { padding: 32px 36px; }
+      .section-label { padding: 12px 36px; }
+      .items { padding: 48px 36px; }
+      .item-grid { grid-template-columns: repeat(2, 1fr); gap: 16px; }
+      .spec-block { padding: 48px 36px; }
       footer { padding: 56px 36px 32px; }
     }
 
@@ -618,10 +708,10 @@
         height: var(--cube-desktop-h);
       }
 
-      .section-label { padding: 8px 56px; max-width: 1100px; }
+      .section-label { padding: 12px 56px; max-width: 1100px; }
       .items { padding: 48px 56px; max-width: 1100px; }
-      .item-grid { grid-template-columns: repeat(3, 1fr); }
-      .spec-block { padding: 36px 56px; max-width: 1100px; }
+      .item-grid { grid-template-columns: repeat(3, 1fr); gap: 16px; }
+      .spec-block { padding: 48px 56px; max-width: 1100px; }
     }
   </style>
 </head>
@@ -634,7 +724,7 @@
       <span>Object Archive</span>
     </div>
     <nav>
-      <a href="#" class="active">[ Index ]</a>
+      <a href="#" class="active">Index</a>
       <a href="#">Catalog</a>
       <a href="#">About</a>
     </nav>
@@ -758,9 +848,9 @@
         <h3>正二十面体</h3>
         <p>20の正三角形面、30の稜線、12の頂点から構成されるプラトン立体。対称群は回転群 I（位数60）に属し、すべての正多面体の中で最も球体に近い形状を持つ。</p>
         <div class="item-meta">
-          <span>Vertices: 12</span>
-          <span>Edges: 30</span>
-          <span>Faces: 20</span>
+          <span><span class="meta-label">V</span> <span class="meta-value">12</span></span>
+          <span><span class="meta-label">E</span> <span class="meta-value">30</span></span>
+          <span><span class="meta-label">F</span> <span class="meta-value">20</span></span>
         </div>
       </div>
 
@@ -770,9 +860,9 @@
         <h3>トーラス構造体</h3>
         <p>ドーナツ形状の位相幾何学的曲面。オイラー標数は0。パラメトリック表現により32×32の制御点メッシュで近似される非自明な曲面構造。</p>
         <div class="item-meta">
-          <span>Genus: 1</span>
-          <span>Segments: 1024</span>
-          <span>Type: Surface</span>
+          <span><span class="meta-label">Genus</span> <span class="meta-value">1</span></span>
+          <span><span class="meta-label">Seg</span> <span class="meta-value">1024</span></span>
+          <span><span class="meta-label">Type</span> <span class="meta-value">Surface</span></span>
         </div>
       </div>
 
@@ -782,9 +872,9 @@
         <h3>メビウスの帯</h3>
         <p>非可向面の代表的な例。一枚の帯を半回転させて端を接合した構造体。表裏の区別が存在しない特異な位相的性質を持ち、境界は単一閉曲線となる。</p>
         <div class="item-meta">
-          <span>Orientable: No</span>
-          <span>Euler: 0</span>
-          <span>Boundary: 1</span>
+          <span><span class="meta-label">Orient</span> <span class="meta-value">No</span></span>
+          <span><span class="meta-label">Euler</span> <span class="meta-value">0</span></span>
+          <span><span class="meta-label">Bdy</span> <span class="meta-value">1</span></span>
         </div>
       </div>
 
@@ -794,9 +884,9 @@
         <h3>クラインの壺</h3>
         <p>三次元空間には埋め込み不可能な閉曲面。メビウスの帯を拡張した非可向閉曲面であり、内側と外側の区別が存在しない四次元的構造。</p>
         <div class="item-meta">
-          <span>Orientable: No</span>
-          <span>Euler: 0</span>
-          <span>Dim: 4</span>
+          <span><span class="meta-label">Orient</span> <span class="meta-value">No</span></span>
+          <span><span class="meta-label">Euler</span> <span class="meta-value">0</span></span>
+          <span><span class="meta-label">Dim</span> <span class="meta-value">4</span></span>
         </div>
       </div>
 
@@ -806,9 +896,9 @@
         <h3>正十二面体</h3>
         <p>12の正五角形面から構成されるプラトン立体。黄金比と深い関連を持ち、各頂点において3つの正五角形が会合する。宇宙の形状仮説でも議論される。</p>
         <div class="item-meta">
-          <span>Vertices: 20</span>
-          <span>Edges: 30</span>
-          <span>Faces: 12</span>
+          <span><span class="meta-label">V</span> <span class="meta-value">20</span></span>
+          <span><span class="meta-label">E</span> <span class="meta-value">30</span></span>
+          <span><span class="meta-label">F</span> <span class="meta-value">12</span></span>
         </div>
       </div>
 
@@ -818,9 +908,9 @@
         <h3>四次元超立方体</h3>
         <p>テッセラクトとも呼ばれる四次元正多胞体。8つの立方体セル、24の正方形面、32の稜線、16の頂点を持つ。三次元への射影で複雑な入れ子構造が現れる。</p>
         <div class="item-meta">
-          <span>Cells: 8</span>
-          <span>Faces: 24</span>
-          <span>Vertices: 16</span>
+          <span><span class="meta-label">Cells</span> <span class="meta-value">8</span></span>
+          <span><span class="meta-label">F</span> <span class="meta-value">24</span></span>
+          <span><span class="meta-label">V</span> <span class="meta-value">16</span></span>
         </div>
       </div>
     </div>
@@ -832,6 +922,12 @@
   <!-- Spec block -->
   <section class="spec-block">
     <h2>Archive Specifications</h2>
+
+    <div class="spec-hero">
+      <div class="spec-hero-label">Total Objects</div>
+      <div class="spec-hero-number">2,847<span class="spec-hero-unit">entries</span></div>
+    </div>
+
     <div class="spec-row">
       <span class="spec-label">Coordinate System</span>
       <span class="spec-value">Right-Handed Cartesian</span>
@@ -844,13 +940,16 @@
       <span class="spec-label">Mesh Format</span>
       <span class="spec-value">Half-Edge Structure</span>
     </div>
-    <div class="spec-row">
-      <span class="spec-label">Total Objects</span>
-      <span class="spec-value">2,847</span>
-    </div>
-    <div class="spec-row">
-      <span class="spec-label">Storage</span>
-      <span class="spec-value">14.2 TB Compressed</span>
+    <div class="spec-bar-row">
+      <div class="spec-bar-header">
+        <span class="spec-label">Storage</span>
+        <span class="spec-value">14.2 / 20.0 TB</span>
+      </div>
+      <div class="seg-bar">
+        <span class="filled"></span><span class="filled"></span><span class="filled"></span>
+        <span class="filled"></span><span class="filled"></span><span class="filled"></span>
+        <span class="filled"></span><span></span><span></span><span></span>
+      </div>
     </div>
     <div class="spec-row">
       <span class="spec-label">Last Sync</span>
@@ -860,11 +959,7 @@
 
   <!-- Footer -->
   <footer>
-    <div class="footer-dots">
-      <span></span>
-      <span></span>
-      <span></span>
-    </div>
+    <div class="footer-status"><span class="status-dot"></span>System Active</div>
     <p>3D Object Archive — Nothing Design System — 2025</p>
   </footer>
 
