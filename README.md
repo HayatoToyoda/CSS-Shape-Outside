@@ -8,7 +8,9 @@ Nothing 系のタイポグラフィとドットグリッド上に、**ビュー�
 
 GitHub Pages（`main` プッシュで自動デプロイ）:
 
-**https://hayatoyoda.github.io/CSS-Shape-Outside/**
+**https://HayatoToyoda.github.io/CSS-Shape-Outside/**
+
+> **Note:** `*.github.io` のホスト名は GitHub 側のバーチャルホスト設定の都合で、**GitHub ユーザー名の大文字・小文字と一致した URL だけ**が 200 を返すことがあります。README や共有リンクは `HayatoToyoda` の表記を維持してください（`hayatoyoda.github.io` だと 404 になります）。
 
 ## 特徴
 
