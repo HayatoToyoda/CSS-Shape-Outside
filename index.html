@@ -49,9 +49,10 @@
       --caption:    12px;
       --label:      11px;
 
-      /* Layout — hex long diagonal (vertex↔vertex in SVG) = viewport height.
-         viewBox y: 3→97 → span 94/100 of box height → diagonal_px = height × 0.94 */
-      --cube-mobile-h: calc(100svh * 100 / 94);
+      /* Layout — hex long diagonal (vertex↔vertex in SVG) ≈ viewport height on tablet+.
+         viewBox y: 3→97 → span 94/100 of box height → diagonal_px = height × 0.94.
+         Narrow viewports: cap by vw so the hex leaves room for text reflow (hexAvoid). */
+      --cube-mobile-h: calc(min(100svh, 72vw) * 100 / 94);
       --cube-mobile:   calc(var(--cube-mobile-h) * 115 / 132);
       --cube-desktop:   var(--cube-mobile);
       --cube-desktop-h: var(--cube-mobile-h);
@@ -59,7 +60,7 @@
       --content-pad-x: 16px;
       /* Half width — margin pulls float so hex center sits on viewport right */
       --cube-half: calc(var(--cube-mobile) / 2);
-      --cube-top: clamp(72px, 12svh, 128px);
+      --cube-top: clamp(52px, 9svh, 112px);
       --cube-rotation-speed: 8s;
     }
 
@@ -641,6 +642,10 @@
     @media (min-width: 768px) {
       :root {
         --content-pad-x: 36px;
+        /* Full-height hex diagonal (matches original desktop/tablet behavior) */
+        --cube-mobile-h: calc(100svh * 100 / 94);
+        --cube-mobile:   calc(var(--cube-mobile-h) * 115 / 132);
+        --cube-half: calc(var(--cube-mobile) / 2);
         --cube-top: clamp(88px, 14svh, 144px);
       }
 
