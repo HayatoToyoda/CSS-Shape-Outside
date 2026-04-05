@@ -34,6 +34,10 @@
       --success:         #4A9E5C;
       --warning:         #D4A843;
 
+      /* Dotted background (Nothing-like) */
+      --dot:             rgba(255, 255, 255, 0.09);
+      --dot-strong:      rgba(255, 255, 255, 0.18);
+
       /* For spoke gradient (CSS vars inside conic-gradient) */
       --spoke-color:     rgba(255, 255, 255, 0.85);
       --outline-color:   rgba(255, 255, 255, 0.88);
@@ -75,6 +79,8 @@
       --text-secondary: #666666;
       --text-primary:   #1A1A1A;
       --text-display:   #000000;
+      --dot:            rgba(0, 0, 0, 0.08);
+      --dot-strong:     rgba(0, 0, 0, 0.16);
       --spoke-color:    rgba(0, 0, 0, 0.8);
       --outline-color:  rgba(0, 0, 0, 0.75);
     }
@@ -86,8 +92,12 @@
 
     body {
       background-color: var(--black);
-      background-image: radial-gradient(circle, var(--border) 0.5px, transparent 0.5px);
-      background-size: 12px 12px;
+      /* Nothing-like dotted grid: fine grid + stronger coarse grid (offset) */
+      background-image:
+        radial-gradient(circle at 1px 1px, var(--dot) 1px, transparent 1.25px),
+        radial-gradient(circle at 1px 1px, var(--dot-strong) 1.2px, transparent 1.5px);
+      background-size: 12px 12px, 48px 48px;
+      background-position: 0 0, 24px 24px;
       color: var(--text-primary);
       font-family: 'Space Grotesk', 'DM Sans', system-ui, sans-serif;
       font-weight: 400;
