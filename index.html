@@ -1059,12 +1059,13 @@
   </script>
 
   <script>
-    /* ─── hexAvoid: per-line padding-right synced to rotating hex ─── *
+    /* ─── hexAvoid: paragraph-unified padding via .hex-line layout ─── *
      *
-     * Paragraphs are split into .hex-line spans (visual lines). Each frame,
-     * overlap with the hex silhouette sets padding-right on that line only.
-     * Reflow runs on resize / fonts ready (short convergence loop) because
-     * padding changes line breaks.
+     * Paragraphs are split into .hex-line spans for stable line geometry.
+     * Each frame we take max bleed across lines that overlap the hex band,
+     * then apply that same padding-right to every line in the paragraph so
+     * the block moves as one unit (matches classic per-<p> behavior).
+     * Reflow runs on resize / fonts ready (short convergence loop).
      * ─────────────────────────────────────────────────────────────── */
     (function () {
       var wire  = document.querySelector('.cube-wire');
@@ -1256,6 +1257,7 @@
           var lines = p.querySelectorAll('.hex-line');
           if (!lines.length) continue;
 
+          var paraPad = 0;
           for (var li = 0; li < lines.length; li++) {
             var line = lines[li];
             var lRect = line.getBoundingClientRect();
@@ -1263,12 +1265,9 @@
             var oTop    = Math.max(lRect.top,    hexTop);
             var oBottom = Math.min(lRect.bottom, hexBottom);
 
-            if (oTop >= oBottom) {
-              line.style.paddingRight = '';
-              continue;
-            }
+            if (oTop >= oBottom) continue;
 
-            var maxBleed = 0;
+            var lineBleed = 0;
             var y = oTop;
             while (y < oBottom) {
               var sliceBot = Math.min(y + LINE_H, oBottom);
@@ -1277,16 +1276,17 @@
               var lx = leftEdgeForY(verts, svgY0, svgY1);
               if (lx < Infinity) {
                 var bleed = lRect.right - (wRect.left + lx / 100 * wW);
-                if (bleed > maxBleed) maxBleed = bleed;
+                if (bleed > lineBleed) lineBleed = bleed;
               }
               y = sliceBot;
             }
 
-            if (maxBleed <= 0) {
-              line.style.paddingRight = '';
-            } else {
-              line.style.paddingRight = Math.round(maxBleed) + 'px';
-            }
+            if (lineBleed > paraPad) paraPad = lineBleed;
+          }
+
+          var padStr = paraPad <= 0 ? '' : Math.round(paraPad) + 'px';
+          for (var lj = 0; lj < lines.length; lj++) {
+            lines[lj].style.paddingRight = padStr;
           }
         }
 
