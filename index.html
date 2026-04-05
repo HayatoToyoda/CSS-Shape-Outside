@@ -314,15 +314,7 @@
       font-size: var(--body);
       line-height: 1.6;
       padding-right: 0;
-      transition: color 200ms;
-    }
-
-    .content-body p .hex-line {
-      display: block;
-      margin: 0;
-      padding-right: 0;
-      box-sizing: border-box;
-      transition: padding-right 60ms linear;
+      transition: padding-right 60ms linear, color 200ms;
     }
 
     /* ───────────────────────────────────────────────────────
@@ -1059,13 +1051,12 @@
   </script>
 
   <script>
-    /* ─── hexAvoid: paragraph-unified padding via .hex-line layout ─── *
+    /* ─── hexAvoid: per-paragraph padding-right (no .hex-line DOM) ─── *
      *
-     * Paragraphs are split into .hex-line spans for stable line geometry.
-     * Each frame we take max bleed across lines that overlap the hex band,
-     * then apply that same padding-right to every line in the paragraph so
-     * the block moves as one unit (matches classic per-<p> behavior).
-     * Reflow runs on resize / fonts ready (short convergence loop).
+     * One padding-right on each <p> using the paragraph box right edge
+     * (works with max-width centered columns). Slices the hex overlap band
+     * with LINE_H for smooth tracking. No span wrapping — avoids staggered
+     * line blocks and reflow feedback from per-line padding.
      * ─────────────────────────────────────────────────────────────── */
     (function () {
       var wire  = document.querySelector('.cube-wire');
@@ -1086,8 +1077,6 @@
       var PERIOD_MS = 8000; /* must match CSS --cube-rotation-speed */
       var startTime = performance.now();
       var LINE_H = 6;
-      var REFLOW_ITERS = 3;
-      var resizeTimer = null;
 
       function rotatedVerts(angle) {
         var cos = Math.cos(angle), sin = Math.sin(angle);
@@ -1123,118 +1112,6 @@
         return leftX;
       }
 
-      function rangeSingleLine(textNode, start, end) {
-        var range = document.createRange();
-        range.setStart(textNode, start);
-        range.setEnd(textNode, end);
-        var rects = range.getClientRects();
-        if (!rects.length) return true;
-        var top0 = rects[0].top;
-        for (var i = 1; i < rects.length; i++) {
-          if (Math.abs(rects[i].top - top0) > 2) return false;
-        }
-        return true;
-      }
-
-      function lineEndAt(textNode, start, maxLen) {
-        var lo = start + 1;
-        var hi = maxLen;
-        var ans = start + 1;
-        while (lo <= hi) {
-          var mid = (lo + hi) >> 1;
-          if (rangeSingleLine(textNode, start, mid)) {
-            ans = mid;
-            lo = mid + 1;
-          } else {
-            hi = mid - 1;
-          }
-        }
-        return ans;
-      }
-
-      function unwrapParagraph(p) {
-        var plain = p.dataset.hexPlain;
-        if (plain == null) plain = p.textContent;
-        p.dataset.hexPlain = plain;
-        p.textContent = plain;
-        p.style.paddingRight = '';
-      }
-
-      function wrapParagraph(p) {
-        var text = p.dataset.hexPlain;
-        if (text == null) {
-          text = p.textContent;
-          p.dataset.hexPlain = text;
-        }
-        if (!text.length) return;
-
-        p.innerHTML = '';
-        var tn = document.createTextNode(text);
-        p.appendChild(tn);
-
-        var n = text.length;
-        var starts = [];
-        var pos = 0;
-        while (pos < n) {
-          starts.push(pos);
-          var end = lineEndAt(tn, pos, n);
-          if (end <= pos) end = Math.min(pos + 1, n);
-          pos = end;
-        }
-
-        p.removeChild(tn);
-        p.innerHTML = '';
-
-        for (var s = 0; s < starts.length; s++) {
-          var a = starts[s];
-          var b = s + 1 < starts.length ? starts[s + 1] : n;
-          var span = document.createElement('span');
-          span.className = 'hex-line';
-          span.textContent = text.slice(a, b);
-          p.appendChild(span);
-        }
-      }
-
-      function clearLinePadding() {
-        for (var i = 0; i < paras.length; i++) {
-          var lines = paras[i].querySelectorAll('.hex-line');
-          for (var j = 0; j < lines.length; j++) {
-            lines[j].style.paddingRight = '';
-          }
-          paras[i].style.paddingRight = '';
-        }
-      }
-
-      function reflowParagraphs() {
-        for (var k = 0; k < REFLOW_ITERS; k++) {
-          clearLinePadding();
-          for (var i = 0; i < paras.length; i++) {
-            unwrapParagraph(paras[i]);
-            wrapParagraph(paras[i]);
-          }
-        }
-      }
-
-      function scheduleReflow() {
-        if (reduce.matches) return;
-        if (resizeTimer) clearTimeout(resizeTimer);
-        resizeTimer = setTimeout(function () {
-          resizeTimer = null;
-          reflowParagraphs();
-        }, 120);
-      }
-
-      function restorePlainFromReduce() {
-        for (var i = 0; i < paras.length; i++) {
-          var p = paras[i];
-          if (p.dataset.hexPlain != null) {
-            p.textContent = p.dataset.hexPlain;
-            delete p.dataset.hexPlain;
-          }
-          p.style.paddingRight = '';
-        }
-      }
-
       function tick() {
         if (reduce.matches) return;
 
@@ -1254,39 +1131,34 @@
 
         for (var pi = 0; pi < paras.length; pi++) {
           var p = paras[pi];
-          var lines = p.querySelectorAll('.hex-line');
-          if (!lines.length) continue;
+          var pRect = p.getBoundingClientRect();
 
-          var paraPad = 0;
-          for (var li = 0; li < lines.length; li++) {
-            var line = lines[li];
-            var lRect = line.getBoundingClientRect();
+          var oTop    = Math.max(pRect.top,    hexTop);
+          var oBottom = Math.min(pRect.bottom, hexBottom);
 
-            var oTop    = Math.max(lRect.top,    hexTop);
-            var oBottom = Math.min(lRect.bottom, hexBottom);
-
-            if (oTop >= oBottom) continue;
-
-            var lineBleed = 0;
-            var y = oTop;
-            while (y < oBottom) {
-              var sliceBot = Math.min(y + LINE_H, oBottom);
-              var svgY0 = (y        - wRect.top) / wH * 100;
-              var svgY1 = (sliceBot - wRect.top) / wH * 100;
-              var lx = leftEdgeForY(verts, svgY0, svgY1);
-              if (lx < Infinity) {
-                var bleed = lRect.right - (wRect.left + lx / 100 * wW);
-                if (bleed > lineBleed) lineBleed = bleed;
-              }
-              y = sliceBot;
-            }
-
-            if (lineBleed > paraPad) paraPad = lineBleed;
+          if (oTop >= oBottom) {
+            p.style.paddingRight = '';
+            continue;
           }
 
-          var padStr = paraPad <= 0 ? '' : Math.round(paraPad) + 'px';
-          for (var lj = 0; lj < lines.length; lj++) {
-            lines[lj].style.paddingRight = padStr;
+          var maxBleed = 0;
+          var y = oTop;
+          while (y < oBottom) {
+            var sliceBot = Math.min(y + LINE_H, oBottom);
+            var svgY0 = (y        - wRect.top) / wH * 100;
+            var svgY1 = (sliceBot - wRect.top) / wH * 100;
+            var lx = leftEdgeForY(verts, svgY0, svgY1);
+            if (lx < Infinity) {
+              var bleed = pRect.right - (wRect.left + lx / 100 * wW);
+              if (bleed > maxBleed) maxBleed = bleed;
+            }
+            y = sliceBot;
+          }
+
+          if (maxBleed <= 0) {
+            p.style.paddingRight = '';
+          } else {
+            p.style.paddingRight = Math.round(maxBleed) + 'px';
           }
         }
 
@@ -1294,25 +1166,11 @@
       }
 
       reduce.addEventListener('change', function () {
-        if (reduce.matches) {
-          restorePlainFromReduce();
-        } else {
-          reflowParagraphs();
-          requestAnimationFrame(tick);
-        }
+        paras.forEach(function (p) { p.style.paddingRight = ''; });
+        if (!reduce.matches) requestAnimationFrame(tick);
       });
 
       if (reduce.matches) return;
-
-      reflowParagraphs();
-
-      if (document.fonts && document.fonts.ready) {
-        document.fonts.ready.then(function () {
-          reflowParagraphs();
-        });
-      }
-
-      window.addEventListener('resize', scheduleReflow);
 
       requestAnimationFrame(tick);
     })();
