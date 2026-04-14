@@ -1,0 +1,26 @@
+{
+  "name": "workspace",
+  "version": "1.0.0",
+  "description": "Nothing 系のタイポグラフィとドットグリッド上に、**ビューポート右端で回転するワイヤーフレーム六角形**と、それに**本文が寄っていく**挙動を載せたシングルページのデモです。ビルドツールは不要で、`index.html` だけで動きます。",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/HayatoToyoda/CSS-Shape-Outside.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/HayatoToyoda/CSS-Shape-Outside/issues"
+  },
+  "homepage": "https://github.com/HayatoToyoda/CSS-Shape-Outside#readme",
+  "dependencies": {
+    "@chenglou/pretext": "^0.0.5",
+    "vite": "^8.0.8"
+  }
+}

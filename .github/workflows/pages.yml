@@ -1,4 +1,4 @@
-# GitHub Pages — 静的ファイルのみを公開（リポジトリ直下の index.html）
+# GitHub Pages — Vite でビルドした静的成果物を公開
 # 公開 URL のホスト名は GitHub ユーザー名の大文字小文字と一致させること
 # （例: HayatoToyoda.github.io は 200、hayatoyoda.github.io は 404 になる場合がある）
 name: Deploy GitHub Pages
@@ -27,10 +27,19 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Prepare site root
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
         run: |
-          mkdir -p _site
-          cp index.html .nojekyll _site/
+          npm ci
+
+      - name: Build site
+        run: |
+          npm run build
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
@@ -38,7 +47,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: _site
+          path: dist
 
       - name: Deploy to GitHub Pages
         id: deployment
