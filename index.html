@@ -308,19 +308,38 @@
       transition: color 200ms;
     }
 
-    .content-body p {
+    .editorial-source p {
       margin-bottom: 24px;
       color: var(--text-primary);
       font-size: var(--body);
       line-height: 1.6;
-      padding-right: 0;
-      transition: padding-right 60ms linear, color 200ms;
+      transition: color 200ms;
+    }
+
+    .editorial-stage {
+      display: none;
+      position: relative;
+      width: 100%;
+      min-height: 320px;
+    }
+
+    html.editorial-ready .editorial-stage {
+      display: block;
+    }
+
+    html.editorial-ready .editorial-source {
+      display: none;
+    }
+
+    .article-canvas {
+      display: block;
+      width: 100%;
+      height: auto;
     }
 
     /* ───────────────────────────────────────────────────────
-       2D hex — 高さ0のstickyラッパーでフローに影響を与えない。
-       実際の六角形SVGは overflow:visible で視覚的にはみ出す。
-       JS (hexAvoid) が全段落の padding-right を毎フレーム設定。
+       2D hex — 本文は Canvas 上で行ごとに再レイアウトされる。
+       SVG 側の六角形は JS で自転・ドリフトし、本文の行幅計算と同期。
        ─────────────────────────────────────────────────── */
     .cube-wrap {
       position: sticky;
@@ -346,7 +365,6 @@
       fill: none;
       color: var(--outline-color);
       transform-origin: 50% 50%;
-      animation: wire-rotate var(--cube-rotation-speed) linear infinite;
       will-change: transform;
     }
 
@@ -370,14 +388,8 @@
       opacity: 0.82;
     }
 
-    @keyframes wire-rotate {
-      from { transform: rotate(0deg); }
-      to   { transform: rotate(-360deg); }
-    }
-
     @media (prefers-reduced-motion: reduce) {
       .cube-wire {
-        animation: none;
         will-change: auto;
       }
     }
@@ -825,73 +837,79 @@
 
     <h2>Geometric Forms</h2>
 
-    <p>
-      私たちの周囲には、無数の立体形状が存在している。テーブルの上に置かれたマグカップ、
-      本棚に並ぶ書籍の背表紙、窓から差し込む光が落とす影——そのすべてが三次元空間における
-      幾何学的オブジェクトとして解釈可能である。本アーカイブは、そうした日常の中に潜む
-      立体形状を系統的に収集・分類・記録するプロジェクトとして発足した。
-      物体の形を観察し、その構造を解き明かすことは、人類が古くから続けてきた知的営為の
-      ひとつである。古代ギリシャのプラトンは、宇宙を構成する元素と正多面体を対応づけ、
-      形状に神秘的な意味を見出した。
-    </p>
+    <div class="editorial-stage">
+      <canvas class="article-canvas" aria-hidden="true"></canvas>
+    </div>
 
-    <p>
-      立方体（キューブ）は最も基本的な多面体のひとつであり、6つの正方形面、
-      12の稜線、8つの頂点から構成される。その対称性と規則性は、建築・デザイン・
-      工学の分野において基準座標系として広く採用されている。アイソメトリック
-      投影法により二次元平面に射影すると、正六角形のシルエットが現れ、
-      3つの菱形面が均等に配置された特徴的なパターンを形成する。この六角形の
-      輪郭は、ワイヤーフレーム表現における最も象徴的なビジュアルのひとつであり、
-      デジタルデザインの文脈において頻繁に参照される。
-    </p>
+    <div class="editorial-source">
+      <p>
+        私たちの周囲には、無数の立体形状が存在している。テーブルの上に置かれたマグカップ、
+        本棚に並ぶ書籍の背表紙、窓から差し込む光が落とす影——そのすべてが三次元空間における
+        幾何学的オブジェクトとして解釈可能である。本アーカイブは、そうした日常の中に潜む
+        立体形状を系統的に収集・分類・記録するプロジェクトとして発足した。
+        物体の形を観察し、その構造を解き明かすことは、人類が古くから続けてきた知的営為の
+        ひとつである。古代ギリシャのプラトンは、宇宙を構成する元素と正多面体を対応づけ、
+        形状に神秘的な意味を見出した。
+      </p>
 
-    <p>
-      各オブジェクトはワイヤーフレーム表現により抽象化され、その構造的本質のみが
-      抽出される。表面のテクスチャや色彩を排除し、純粋な形状情報——頂点座標、
-      稜線の接続関係、面の構成——のみをデータとして保持する。この還元主義的
-      アプローチにより、異なるオブジェクト間の構造的類似性や、隠れた幾何学的
-      パターンを発見することが可能となる。マテリアルの物性を無視し、
-      トポロジーのみに着目することで、一見まったく異なる形状が同一の
-      位相構造を共有していることが明らかになる場合がある。
-    </p>
+      <p>
+        立方体（キューブ）は最も基本的な多面体のひとつであり、6つの正方形面、
+        12の稜線、8つの頂点から構成される。その対称性と規則性は、建築・デザイン・
+        工学の分野において基準座標系として広く採用されている。アイソメトリック
+        投影法により二次元平面に射影すると、正六角形のシルエットが現れ、
+        3つの菱形面が均等に配置された特徴的なパターンを形成する。この六角形の
+        輪郭は、ワイヤーフレーム表現における最も象徴的なビジュアルのひとつであり、
+        デジタルデザインの文脈において頻繁に参照される。
+      </p>
 
-    <p>
-      デジタルアーカイブにおいて、各オブジェクトのメタデータは厳密に管理される。
-      取得日時、座標系、測定精度、スキャン方法——すべての情報がタグ付けされ、
-      検索可能なデータベースに格納される。頂点データは倍精度浮動小数点数で
-      記録され、0.001mm未満の精度が保証される。このレベルの精密さは、
-      マイクロスケールの形状解析やシミュレーションにおいて不可欠である。
-      データの整合性はハッシュ値により検証され、改ざんや劣化のない状態での
-      長期保存が実現されている。
-    </p>
+      <p>
+        各オブジェクトはワイヤーフレーム表現により抽象化され、その構造的本質のみが
+        抽出される。表面のテクスチャや色彩を排除し、純粋な形状情報——頂点座標、
+        稜線の接続関係、面の構成——のみをデータとして保持する。この還元主義的
+        アプローチにより、異なるオブジェクト間の構造的類似性や、隠れた幾何学的
+        パターンを発見することが可能となる。マテリアルの物性を無視し、
+        トポロジーのみに着目することで、一見まったく異なる形状が同一の
+        位相構造を共有していることが明らかになる場合がある。
+      </p>
 
-    <p>
-      収集対象は人工物に限定されない。自然界に存在する結晶構造、貝殻の
-      螺旋形状、植物の葉脈パターンなど、有機的な形状も重要なアーカイブ対象
-      である。これらの自然形状は、多くの場合、フラクタル的な自己相似性や
-      フィボナッチ数列に基づく黄金比を内包しており、純粋な幾何学では
-      記述しきれない複雑性を持つ。しかし、ワイヤーフレーム表現による
-      簡略化によって、その根底にある数学的構造を可視化することが可能となる。
-    </p>
+      <p>
+        デジタルアーカイブにおいて、各オブジェクトのメタデータは厳密に管理される。
+        取得日時、座標系、測定精度、スキャン方法——すべての情報がタグ付けされ、
+        検索可能なデータベースに格納される。頂点データは倍精度浮動小数点数で
+        記録され、0.001mm未満の精度が保証される。このレベルの精密さは、
+        マイクロスケールの形状解析やシミュレーションにおいて不可欠である。
+        データの整合性はハッシュ値により検証され、改ざんや劣化のない状態での
+        長期保存が実現されている。
+      </p>
 
-    <p>
-      本プロジェクトは、物理的な形状を純粋なデータへと昇華させる試みである。
-      固体としての存在から解放された幾何学的情報は、永続的なデジタル
-      アーティファクトとして保存され、未来の研究者やデザイナーにとっての
-      参照資料となるだろう。形状の本質は、物質ではなく、構造にある——
-      この哲学が、3D Object Archive の根幹を成している。すべての形は
-      数値に還元され、すべての構造は座標の集合として永遠に記録される。
-    </p>
+      <p>
+        収集対象は人工物に限定されない。自然界に存在する結晶構造、貝殻の
+        螺旋形状、植物の葉脈パターンなど、有機的な形状も重要なアーカイブ対象
+        である。これらの自然形状は、多くの場合、フラクタル的な自己相似性や
+        フィボナッチ数列に基づく黄金比を内包しており、純粋な幾何学では
+        記述しきれない複雑性を持つ。しかし、ワイヤーフレーム表現による
+        簡略化によって、その根底にある数学的構造を可視化することが可能となる。
+      </p>
 
-    <p>
-      座標空間における頂点の集合は、そのまま位相幾何学的な情報を内包する。
-      すなわち、ある頂点と別の頂点が稜線で結ばれているか否か、どの稜線が
-      どの面を構成するか、そしてそれらの面がどのように隣接しているか——
-      こうした接続情報こそが、三次元オブジェクトの「構造」そのものを定義する。
-      表面上は異なる形状であっても、同一のグラフ構造を持つオブジェクト群は
-      位相同値として分類される。こうした分類体系は、膨大なアーカイブの中から
-      構造的に類似したオブジェクトを効率的に検索するための基盤となる。
-    </p>
+      <p>
+        本プロジェクトは、物理的な形状を純粋なデータへと昇華させる試みである。
+        固体としての存在から解放された幾何学的情報は、永続的なデジタル
+        アーティファクトとして保存され、未来の研究者やデザイナーにとっての
+        参照資料となるだろう。形状の本質は、物質ではなく、構造にある——
+        この哲学が、3D Object Archive の根幹を成している。すべての形は
+        数値に還元され、すべての構造は座標の集合として永遠に記録される。
+      </p>
+
+      <p>
+        座標空間における頂点の集合は、そのまま位相幾何学的な情報を内包する。
+        すなわち、ある頂点と別の頂点が稜線で結ばれているか否か、どの稜線が
+        どの面を構成するか、そしてそれらの面がどのように隣接しているか——
+        こうした接続情報こそが、三次元オブジェクトの「構造」そのものを定義する。
+        表面上は異なる形状であっても、同一のグラフ構造を持つオブジェクト群は
+        位相同値として分類される。こうした分類体系は、膨大なアーカイブの中から
+        構造的に類似したオブジェクトを効率的に検索するための基盤となる。
+      </p>
+    </div>
     </div>
   </section>
 
@@ -1027,153 +1045,6 @@
     <p>3D Object Archive — Nothing Design System — 2025</p>
   </footer>
 
-  <script>
-    (function () {
-      var btn = document.getElementById('themeToggle');
-      var label = btn.querySelector('.theme-label');
-      var html = document.documentElement;
-
-      // Restore from localStorage
-      var saved = localStorage.getItem('nd-theme') || 'dark';
-      apply(saved);
-
-      btn.addEventListener('click', function () {
-        var next = html.dataset.theme === 'dark' ? 'light' : 'dark';
-        apply(next);
-        localStorage.setItem('nd-theme', next);
-      });
-
-      function apply(theme) {
-        html.dataset.theme = theme;
-        label.textContent = theme === 'dark' ? 'LIGHT' : 'DARK';
-      }
-    })();
-  </script>
-
-  <script>
-    /* ─── hexAvoid: per-paragraph padding-right (no .hex-line DOM) ─── *
-     *
-     * One padding-right on each <p> using the paragraph box right edge
-     * (works with max-width centered columns). Slices the hex overlap band
-     * with LINE_H for smooth tracking. No span wrapping — avoids staggered
-     * line blocks and reflow feedback from per-line padding.
-     * ─────────────────────────────────────────────────────────────── */
-    (function () {
-      var wire  = document.querySelector('.cube-wire');
-      var paras = document.querySelectorAll('.content-body p');
-      if (!wire || !paras.length) return;
-
-      var reduce = window.matchMedia('(prefers-reduced-motion: reduce)');
-
-      var HEX_VERTS = [
-        [50,  3],
-        [92, 27],
-        [92, 73],
-        [50, 97],
-        [ 8, 73],
-        [ 8, 27]
-      ];
-      var CX = 50, CY = 50;
-      var PERIOD_MS = 8000; /* must match CSS --cube-rotation-speed */
-      var startTime = performance.now();
-      var LINE_H = 6;
-
-      function rotatedVerts(angle) {
-        var cos = Math.cos(angle), sin = Math.sin(angle);
-        return HEX_VERTS.map(function (v) {
-          var dx = v[0] - CX, dy = v[1] - CY;
-          return [CX + cos * dx - sin * dy, CY + sin * dx + cos * dy];
-        });
-      }
-
-      function leftEdgeForY(verts, yMin, yMax) {
-        var n    = verts.length;
-        var yMid = (yMin + yMax) * 0.5;
-        var leftX = Infinity;
-
-        for (var i = 0; i < n; i++) {
-          var a = verts[i], b = verts[(i + 1) % n];
-          var aY = a[1], bY = b[1];
-          if (!((aY <= yMid && bY >= yMid) || (bY <= yMid && aY >= yMid))) continue;
-
-          var dy = bY - aY;
-          var x;
-          if (Math.abs(dy) < 0.001) {
-            var edgeMidX = (a[0] + b[0]) * 0.5;
-            if (edgeMidX >= CX) continue;
-            x = Math.min(a[0], b[0]);
-          } else {
-            x = a[0] + (yMid - aY) * (b[0] - a[0]) / dy;
-          }
-
-          if (x < leftX) leftX = x;
-        }
-
-        return leftX;
-      }
-
-      function tick() {
-        if (reduce.matches) return;
-
-        var angle = -((performance.now() - startTime) % PERIOD_MS) / PERIOD_MS * Math.PI * 2;
-        var verts = rotatedVerts(angle);
-
-        var hexSvgYMin = Infinity, hexSvgYMax = -Infinity;
-        for (var vi = 0; vi < verts.length; vi++) {
-          if (verts[vi][1] < hexSvgYMin) hexSvgYMin = verts[vi][1];
-          if (verts[vi][1] > hexSvgYMax) hexSvgYMax = verts[vi][1];
-        }
-
-        var wRect = wire.getBoundingClientRect();
-        var wW = wRect.width, wH = wRect.height;
-        var hexTop    = wRect.top + hexSvgYMin / 100 * wH;
-        var hexBottom = wRect.top + hexSvgYMax / 100 * wH;
-
-        for (var pi = 0; pi < paras.length; pi++) {
-          var p = paras[pi];
-          var pRect = p.getBoundingClientRect();
-
-          var oTop    = Math.max(pRect.top,    hexTop);
-          var oBottom = Math.min(pRect.bottom, hexBottom);
-
-          if (oTop >= oBottom) {
-            p.style.paddingRight = '';
-            continue;
-          }
-
-          var maxBleed = 0;
-          var y = oTop;
-          while (y < oBottom) {
-            var sliceBot = Math.min(y + LINE_H, oBottom);
-            var svgY0 = (y        - wRect.top) / wH * 100;
-            var svgY1 = (sliceBot - wRect.top) / wH * 100;
-            var lx = leftEdgeForY(verts, svgY0, svgY1);
-            if (lx < Infinity) {
-              var bleed = pRect.right - (wRect.left + lx / 100 * wW);
-              if (bleed > maxBleed) maxBleed = bleed;
-            }
-            y = sliceBot;
-          }
-
-          if (maxBleed <= 0) {
-            p.style.paddingRight = '';
-          } else {
-            p.style.paddingRight = Math.round(maxBleed) + 'px';
-          }
-        }
-
-        requestAnimationFrame(tick);
-      }
-
-      reduce.addEventListener('change', function () {
-        paras.forEach(function (p) { p.style.paddingRight = ''; });
-        if (!reduce.matches) requestAnimationFrame(tick);
-      });
-
-      if (reduce.matches) return;
-
-      requestAnimationFrame(tick);
-    })();
-  </script>
+  <script type="module" src="./main.js"></script>
 </body>
 </html>
