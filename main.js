@@ -1,10 +1,3 @@
-import {
-  clearCache,
-  layoutNextLineRange,
-  materializeLineRange,
-  prepareWithSegments,
-} from '@chenglou/pretext';
-
 const HEX_VERTS = [
   [50, 3],
   [92, 27],
@@ -16,9 +9,10 @@ const HEX_VERTS = [
 
 const ROTATION_PERIOD_MS = 8000;
 const MIN_LINE_WIDTH = 120;
+const LITE_MEDIA_QUERY = '(max-width: 767px), (hover: none) and (pointer: coarse)';
 
 initThemeToggle();
-initEditorialEngine();
+initEditorial();
 
 function initThemeToggle() {
   const btn = document.getElementById('themeToggle');
@@ -45,7 +39,26 @@ function initThemeToggle() {
   }
 }
 
-async function initEditorialEngine() {
+function initEditorial() {
+  const html = document.documentElement;
+  const liteMql = window.matchMedia(LITE_MEDIA_QUERY);
+
+  // Phones and coarse-pointer devices (iPhone, iPad in hand-held orientation,
+  // Android) can't afford per-frame canvas re-typesetting without risking a
+  // renderer crash. Fall back to the original flow with a CSS-only hex spin.
+  if (liteMql.matches) {
+    html.classList.add('editorial-lite');
+    return;
+  }
+
+  import('@chenglou/pretext').then((pretext) => {
+    initEditorialEngine(pretext);
+  });
+}
+
+function initEditorialEngine(pretext) {
+  const { clearCache, layoutNextLineRange, materializeLineRange, prepareWithSegments } = pretext;
+
   const html = document.documentElement;
   const stage = document.querySelector('.editorial-stage');
   const canvas = document.querySelector('.article-canvas');
@@ -73,6 +86,7 @@ async function initEditorialEngine() {
   let rafId = 0;
   let renderPending = false;
   let stageVisible = false;
+  let stageInView = true;
 
   stage.style.display = 'block';
   stage.style.visibility = 'hidden';
@@ -83,6 +97,25 @@ async function initEditorialEngine() {
 
   resizeObserver.observe(stage);
   source.parentElement && resizeObserver.observe(source.parentElement);
+
+  // Pause the animation when the stage isn't visible — on long pages this
+  // avoids burning battery and layout work on off-screen content.
+  if (typeof IntersectionObserver === 'function') {
+    const io = new IntersectionObserver(
+      (entries) => {
+        const visible = entries.some((entry) => entry.isIntersecting);
+        stageInView = visible;
+        if (visible) {
+          requestRender();
+        } else if (rafId) {
+          cancelAnimationFrame(rafId);
+          rafId = 0;
+        }
+      },
+      { rootMargin: '200px 0px' }
+    );
+    io.observe(stage);
+  }
 
   if (document.fonts?.ready) {
     document.fonts.ready.then(() => {
@@ -99,7 +132,6 @@ async function initEditorialEngine() {
   }
 
   window.addEventListener('resize', requestRender, { passive: true });
-  window.addEventListener('scroll', requestRender, { passive: true });
   window.addEventListener('themechange', requestRender);
   reduce.addEventListener('change', () => {
     if (reduce.matches && rafId) {
@@ -123,7 +155,7 @@ async function initEditorialEngine() {
   function loop(now) {
     rafId = 0;
     render(now);
-    if (!reduce.matches) {
+    if (!reduce.matches && stageInView) {
       rafId = requestAnimationFrame(loop);
     }
   }
@@ -133,7 +165,10 @@ async function initEditorialEngine() {
     if (!stageWidth) return;
 
     const typography = getTypography(paragraphs[0]);
-    ensurePrepared(paragraphs, typography, preparedState);
+    ensurePrepared(paragraphs, typography, preparedState, {
+      clearCache,
+      prepareWithSegments,
+    });
 
     const motion = getMotion(now, startTime, reduce.matches);
     const stageRect = stage.getBoundingClientRect();
@@ -143,7 +178,8 @@ async function initEditorialEngine() {
       localHex,
       stageWidth,
       typography.lineHeight,
-      typography.paragraphGap
+      typography.paragraphGap,
+      { layoutNextLineRange, materializeLineRange }
     );
 
     applyWireTransform(wire, motion, reduce.matches);
@@ -156,7 +192,7 @@ async function initEditorialEngine() {
       stageVisible = true;
     }
 
-    if (!reduce.matches && !rafId) {
+    if (!reduce.matches && stageInView && !rafId) {
       rafId = requestAnimationFrame(loop);
     }
   }
@@ -187,17 +223,17 @@ function buildCanvasFont(style) {
     .join(' ');
 }
 
-function ensurePrepared(paragraphs, typography, preparedState) {
+function ensurePrepared(paragraphs, typography, preparedState, pretext) {
   const texts = paragraphs.map((paragraph) =>
     (paragraph.textContent || '').replace(/\s+/g, ' ').trim()
   );
   const key = `${typography.font}__${texts.join('__')}`;
   if (key === preparedState.key) return;
 
-  clearCache();
+  pretext.clearCache();
   preparedState.key = key;
   preparedState.items = texts.map((text) => ({
-    prepared: prepareWithSegments(text, typography.font),
+    prepared: pretext.prepareWithSegments(text, typography.font),
   }));
 }
 
@@ -253,12 +289,12 @@ function applyWireTransform(wire, motion, reduceMotion) {
     : `translate3d(${motion.driftX}px, ${motion.driftY}px, 0) rotate(${motion.angle}rad)`;
 }
 
-function layoutParagraphs(paragraphs, localHex, stageWidth, lineHeight, paragraphGap) {
+function layoutParagraphs(paragraphs, localHex, stageWidth, lineHeight, paragraphGap, pretext) {
   const items = [];
   let y = 0;
 
   for (let i = 0; i < paragraphs.length; i++) {
-    const lines = layoutParagraph(paragraphs[i].prepared, localHex, stageWidth, y, lineHeight);
+    const lines = layoutParagraph(paragraphs[i].prepared, localHex, stageWidth, y, lineHeight, pretext);
     items.push(...lines);
     y = lines.length ? lines[lines.length - 1].y + lineHeight : y + lineHeight;
     if (i < paragraphs.length - 1) {
@@ -272,14 +308,14 @@ function layoutParagraphs(paragraphs, localHex, stageWidth, lineHeight, paragrap
   };
 }
 
-function layoutParagraph(prepared, localHex, stageWidth, startY, lineHeight) {
+function layoutParagraph(prepared, localHex, stageWidth, startY, lineHeight, pretext) {
   const lines = [];
   let cursor = { segmentIndex: 0, graphemeIndex: 0 };
   let y = startY;
 
   while (true) {
     const maxWidth = getLineWidth(localHex, stageWidth, y, y + lineHeight);
-    const range = layoutNextLineRange(prepared, cursor, maxWidth);
+    const range = pretext.layoutNextLineRange(prepared, cursor, maxWidth);
     if (!range) break;
 
     if (
@@ -289,7 +325,7 @@ function layoutParagraph(prepared, localHex, stageWidth, startY, lineHeight) {
       break;
     }
 
-    const line = materializeLineRange(prepared, range);
+    const line = pretext.materializeLineRange(prepared, range);
     lines.push({
       text: line.text,
       y,
