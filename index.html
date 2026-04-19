@@ -394,6 +394,22 @@
       }
     }
 
+    /* Lite mode: CSS-only hex rotation for devices where the canvas
+       re-typesetting engine is too heavy (phones, low-power GPUs). */
+    @keyframes cube-rotate {
+      to { transform: rotate(-360deg); }
+    }
+
+    html.editorial-lite .cube-wire {
+      animation: cube-rotate var(--cube-rotation-speed, 8s) linear infinite;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html.editorial-lite .cube-wire {
+        animation: none;
+      }
+    }
+
     @keyframes blink {
       0%, 100% { opacity: 1; }
       50%       { opacity: 0.2; }
