@@ -1,6 +1,6 @@
 # CSS-Shape-Outside
 
-Nothing 系のタイポグラフィとドットグリッド上に、**ビューポート右端で回転・ドリフトするワイヤーフレーム六角形**と、それを避けながら**本文が行単位で流動的に組み替わる**挙動を載せたシングルページのデモです。本文は `@chenglou/pretext` を使って Canvas に描画しています。
+Nothing 系のタイポグラフィとドットグリッド上に、**ビューポート右端で回転・ドリフトするワイヤーフレーム六角形**と、それを避けながら**本文が行単位で流動的に組み替わる**挙動を載せたシングルページのデモです。本文は `@chenglou/pretext` で行幅を求め、**行ごとに絶対配置の DOM へ投影**します（毎フレームの Canvas 全文描画は行いません）。
 
 [![Deploy GitHub Pages](https://github.com/HayatoToyoda/CSS-Shape-Outside/actions/workflows/pages.yml/badge.svg)](https://github.com/HayatoToyoda/CSS-Shape-Outside/actions/workflows/pages.yml)
 
@@ -18,7 +18,7 @@ GitHub Pages（`main` プッシュで自動デプロイ）:
 |------|------|
 | **六角形** | SVG。外周は実線、内部は点線ガイド。反時計回りに回転しつつ、スクロールに連動して微小ドリフトします。 |
 | **サイズ・位置** | 上下頂点間（長い対角線）が `100svh` と一致するようスケール。幾何中心は **`50vh` の縦中央**（`position: fixed` + `top: calc(50vh - height/2)`）。右端では中心がビューポート右辺に乗るように配置。 |
-| **本文** | ソース段落を `@chenglou/pretext` で事前解析し、各行ごとに六角形の輪郭を避ける可用幅を計算して Canvas に再描画します。 |
+| **本文** | ソース段落を `@chenglou/pretext` で事前解析し、各行の可用幅に合わせて折り返し、`.article-line` へ差分更新で投影。六角形の `transform` は毎フレーム、再組版は低頻度。 |
 | **テーマ** | ヘッダーでダーク / ライト切替。`localStorage` に保存。 |
 | **アクセシビリティ** | `prefers-reduced-motion: reduce` のときは六角形の回転・ドリフトと本文の連続再配置を停止します。 |
 | **レイアウト** | 768px / 1200px 付近で余白・タイポを調整。 |
@@ -29,7 +29,7 @@ GitHub Pages（`main` プッシュで自動デプロイ）:
 |------|------|
 | マークアップ・スタイル | [`index.html`](index.html)（埋め込み CSS）。 |
 | レイアウトエンジン | [`@chenglou/pretext`](https://github.com/chenglou/pretext) |
-| アプリスクリプト | [`main.js`](main.js)（テーマ切り替え + Pretext 組版 + Canvas 描画 + 六角形モーション） |
+| アプリスクリプト | [`main.js`](main.js)（テーマ + Pretext 組版 + DOM 行プール + 六角形モーション） |
 | ビルド | Vite |
 
 `shape-outside` や段落単位の `padding-right` ではなく、**行ごとに可用幅を変更しながら本文を再ルーティングする**方針に切り替えています。これにより、六角形の自転とスクロールによるドリフトに合わせて、本文が誌面的に押し出される表現を狙っています。
